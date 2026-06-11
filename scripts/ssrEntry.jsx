@@ -72,6 +72,25 @@ export async function run() {
   assert(useStore.getState().character.hp.current === 28, 'HP damage did not apply (expected 38-10=28)')
   console.log('  ✓ hp damage   works')
 
+  // Editable attacks: add a custom attack, confirm it renders, then remove it.
+  await act(async () => {
+    useStore.getState().setActiveTab('combat')
+    useStore.getState().upsertAttack({
+      id: 'test-atk',
+      name: 'Test Blade',
+      actionType: 'attack',
+      range: '5 ft',
+      toHitBonus: 7,
+      damage: [{ count: 2, sides: 6, type: 'Slashing', bonus: 3 }],
+      notes: '',
+    })
+  })
+  assert(container.textContent.includes('Test Blade'), 'custom attack did not render')
+  assert(container.textContent.includes('2d6+3'), 'custom attack damage did not render')
+  await act(async () => useStore.getState().removeAttack('test-atk'))
+  assert(!container.textContent.includes('Test Blade'), 'attack was not removed')
+  console.log('  ✓ attacks     add/remove works')
+
   await act(async () => root.unmount())
   dom.window.close()
   console.log('Render smoke test passed.')

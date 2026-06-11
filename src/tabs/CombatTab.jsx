@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { getAC, getMaxHp } from '../rules/derive.js'
 import { signed } from '../rules/dnd.js'
+import { cryptoId } from '../model/character.js'
+import { formatDamageParts } from '../utils/rollFormat.js'
 
 export default function CombatTab() {
   const character = useStore((s) => s.character)
@@ -182,36 +184,35 @@ function Attacks() {
   const rollCheck = useStore((s) => s.rollCheck)
   const rollDamage = useStore((s) => s.rollDamage)
   const attacks = character.actions?.filter((a) => a.actionType === 'attack') || []
-
-  if (attacks.length === 0) {
-    return (
-      <div className="card">
-        <div className="card__title">Attacks</div>
-        <p className="muted" style={{ padding: '4px 14px 14px' }}>
-          No weapon attacks detected. Equip a weapon in D&amp;D Beyond and re-import, or add attacks
-          here in a future update.
-        </p>
-      </div>
-    )
-  }
-
-  const damageText = (a) =>
-    a.damage
-      .map((d) => `${d.count}d${d.sides}${d.bonus ? signed(d.bonus) : ''}`)
-      .join(' + ') || '—'
+  // `null` = closed; an attack object = edit it; 'new' = add a fresh one.
+  const [editing, setEditing] = useState(null)
 
   return (
     <div className="card">
-      <div className="card__title">Attacks &amp; Actions</div>
+      <div className="card__title">
+        Attacks &amp; Actions
+        <button className="btn btn--sm" onClick={() => setEditing('new')}>
+          + Add
+        </button>
+      </div>
+
+      {attacks.length === 0 && (
+        <p className="muted" style={{ padding: '4px 14px 14px' }}>
+          No attacks yet. Tap <b>+ Add</b>, or import a character from D&amp;D Beyond.
+        </p>
+      )}
+
       {attacks.map((a) => (
         <div className="attack" key={a.id}>
-          <span className="attack__name">
-            <b>{a.name}</b>
+          <button className="attack__name attack__name--edit" onClick={() => setEditing(a)}>
+            <b>
+              {a.name} <span className="edit-glyph">✎</span>
+            </b>
             <small>
               {a.range}
               {a.damage[0]?.type ? ` • ${a.damage[0].type}` : ''}
             </small>
-          </span>
+          </button>
           <button
             className="attack__btn"
             onClick={() => rollCheck({ label: `${a.name} — to hit`, modifier: a.toHitBonus, type: 'attack' })}
@@ -224,21 +225,146 @@ function Attacks() {
             onClick={() => rollDamage({ label: `${a.name} — damage`, parts: a.damage })}
           >
             <small>DMG</small>
-            <b>{damageText(a)}</b>
+            <b>{formatDamageParts(a.damage)}</b>
           </button>
-          {a.damage.length > 0 && (
+          <button
+            className="attack__btn"
+            style={{ minWidth: 40 }}
+            title="Critical hit (double dice)"
+            onClick={() => rollDamage({ label: `${a.name} — damage`, parts: a.damage, crit: true })}
+          >
+            <small>CRIT</small>
+            <b>⚡</b>
+          </button>
+        </div>
+      ))}
+
+      {editing && (
+        <AttackEditor
+          attack={editing === 'new' ? null : editing}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+function AttackEditor({ attack, onClose }) {
+  const upsertAttack = useStore((s) => s.upsertAttack)
+  const removeAttack = useStore((s) => s.removeAttack)
+  const isNew = !attack
+  const part = attack?.damage?.[0] || { count: 1, sides: 6, bonus: 0, type: '' }
+
+  const [name, setName] = useState(attack?.name || '')
+  const [toHit, setToHit] = useState(String(attack?.toHitBonus ?? 0))
+  const [count, setCount] = useState(String(part.count ?? 1))
+  const [sides, setSides] = useState(String(part.sides ?? 6))
+  const [bonus, setBonus] = useState(String(part.bonus ?? 0))
+  const [type, setType] = useState(part.type || '')
+  const [range, setRange] = useState(attack?.range || '5 ft')
+
+  const save = () => {
+    const c = parseInt(count, 10) || 0
+    const s = parseInt(sides, 10) || 0
+    const b = parseInt(bonus, 10) || 0
+    const damage = c > 0 || b !== 0 ? [{ count: c, sides: c > 0 ? s : 0, type: type.trim(), bonus: b }] : []
+    upsertAttack({
+      id: attack?.id || cryptoId(),
+      name: name.trim() || 'Attack',
+      source: attack?.source || 'Custom',
+      actionType: 'attack',
+      ability: attack?.ability || null,
+      range: range.trim() || '—',
+      toHitBonus: parseInt(toHit, 10) || 0,
+      damage,
+      notes: attack?.notes || '',
+    })
+    onClose()
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet sheet--center" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__head">
+          <h3>{isNew ? 'Add attack' : 'Edit attack'}</h3>
+          <button className="btn btn--sm btn--ghost" onClick={onClose}>
+            Close
+          </button>
+        </div>
+        <div className="sheet__body">
+          <div className="field">
+            <label>Name</label>
+            <input value={name} autoFocus onChange={(e) => setName(e.target.value)} placeholder="e.g. Lantern-Flail" />
+          </div>
+
+          <div className="row" style={{ gap: 12 }}>
+            <div className="field" style={{ flex: 1 }}>
+              <label>To hit</label>
+              <IntInput value={toHit} onChange={setToHit} allowNegative />
+            </div>
+            <div className="field" style={{ flex: 1 }}>
+              <label>Range</label>
+              <input value={range} onChange={(e) => setRange(e.target.value)} />
+            </div>
+          </div>
+
+          <label className="field" style={{ marginBottom: 4 }}>
+            <span style={{ fontSize: 12, color: 'var(--text-faint)', textTransform: 'uppercase' }}>
+              Damage
+            </span>
+          </label>
+          <div className="row" style={{ gap: 8, alignItems: 'center' }}>
+            <IntInput value={count} onChange={setCount} style={{ width: 52 }} />
+            <span className="muted">d</span>
+            <IntInput value={sides} onChange={setSides} style={{ width: 56 }} />
+            <span className="muted">+</span>
+            <IntInput value={bonus} onChange={setBonus} allowNegative style={{ width: 56 }} />
+            <input
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              placeholder="type"
+              style={{ flex: 1, minWidth: 0 }}
+            />
+          </div>
+          <p className="faint tiny" style={{ marginTop: 6 }}>
+            Tip: set dice count to 0 for a flat hit (e.g. Unarmed Strike → 0 d 0 + 2).
+          </p>
+
+          <button className="btn btn--primary btn--block" style={{ marginTop: 14 }} onClick={save}>
+            {isNew ? 'Add attack' : 'Save'}
+          </button>
+          {!isNew && (
             <button
-              className="attack__btn"
-              style={{ minWidth: 40 }}
-              title="Critical hit (double dice)"
-              onClick={() => rollDamage({ label: `${a.name} — damage`, parts: a.damage, crit: true })}
+              className="btn btn--ghost btn--block btn--danger"
+              style={{ marginTop: 8 }}
+              onClick={() => {
+                removeAttack(attack.id)
+                onClose()
+              }}
             >
-              <small>CRIT</small>
-              <b>⚡</b>
+              Delete attack
             </button>
           )}
         </div>
-      ))}
+      </div>
     </div>
+  )
+}
+
+// Numeric text input that keeps only digits (and an optional leading minus).
+function IntInput({ value, onChange, allowNegative = false, style }) {
+  const clean = (raw) => {
+    let v = raw.replace(allowNegative ? /[^0-9-]/g : /[^0-9]/g, '')
+    if (allowNegative) v = v.replace(/(?!^)-/g, '')
+    return v
+  }
+  return (
+    <input
+      inputMode={allowNegative ? 'text' : 'numeric'}
+      value={value}
+      onChange={(e) => onChange(clean(e.target.value))}
+      onFocus={(e) => e.target.select()}
+      style={{ textAlign: 'center', ...style }}
+    />
   )
 }

@@ -170,6 +170,23 @@ export const sampleDdbCharacter = {
         description: 'A stringed musical instrument; your spellcasting focus.',
       },
     },
+    {
+      // Bundled ammo: 20 arrows weigh 1 lb total (bundleSize 20), so per-unit
+      // weight must be 0.05 — exercises the bundleSize normalization.
+      id: 104,
+      equipped: false,
+      isAttuned: false,
+      quantity: 20,
+      definition: {
+        id: 4,
+        name: 'Arrows',
+        filterType: 'Gear',
+        weight: 1,
+        bundleSize: 20,
+        rarity: 'Common',
+        description: 'Ammunition for a bow.',
+      },
+    },
   ],
 
   classSpells: [

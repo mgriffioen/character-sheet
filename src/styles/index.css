@@ -786,6 +786,21 @@ details.collapser[open] > summary {
   color: var(--text-faint);
   font-size: 11px;
 }
+.attack__name--edit {
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--text);
+  padding: 0;
+}
+.attack__name--edit:active {
+  color: var(--accent);
+}
+.edit-glyph {
+  color: var(--text-faint);
+  font-size: 11px;
+  margin-left: 2px;
+}
 .attack__btn {
   background: var(--surface-3);
   border: 1px solid var(--border);

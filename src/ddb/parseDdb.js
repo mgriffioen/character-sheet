@@ -240,12 +240,16 @@ function parseCurrencies(ddb) {
 function parseInventory(ddb) {
   return (ddb.inventory || []).map((item) => {
     const def = item.definition || {}
+    // DDB stores weight per *bundle* for stacked items (e.g. 20 arrows = 1 lb,
+    // bundleSize 20). Quantity counts individual units, so normalize to a
+    // per-unit weight; otherwise ammo is massively over-counted.
+    const bundleSize = num(def.bundleSize, 1) || 1
     return {
       id: cryptoId(),
       name: def.name || 'Item',
       type: def.filterType || def.type || 'Gear',
       quantity: num(item.quantity, 1),
-      weight: num(def.weight, 0),
+      weight: num(def.weight, 0) / bundleSize,
       equipped: !!item.equipped,
       attuned: !!item.isAttuned,
       rarity: def.rarity || null,
@@ -455,6 +459,23 @@ function parseAttacks(ddb, abilities, classes, proficiencyBonus) {
           ]
         : [],
       notes: props.join(', '),
+    })
+  }
+
+  // D&D Beyond always lists an Unarmed Strike; add one if no weapon already
+  // covers it. Damage is a flat 1 + STR mod (no die), proficient by default.
+  const strMod = abilityModifier(abilities.str)
+  if (!attacks.some((a) => a.name === 'Unarmed Strike')) {
+    attacks.push({
+      id: cryptoId(),
+      name: 'Unarmed Strike',
+      source: 'Unarmed',
+      actionType: 'attack',
+      ability: 'str',
+      range: '5 ft',
+      toHitBonus: strMod + proficiencyBonus,
+      damage: [{ count: 0, sides: 0, type: 'Bludgeoning', bonus: 1 + strMod }],
+      notes: '',
     })
   }
   return attacks

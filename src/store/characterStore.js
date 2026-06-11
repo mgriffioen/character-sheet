@@ -82,6 +82,24 @@ export const useStore = create(
           }
         }),
 
+      // ---- attacks ----
+      upsertAttack: (attack) =>
+        set((state) => {
+          if (!state.character) return state
+          const actions = [...(state.character.actions || [])]
+          const idx = actions.findIndex((a) => a.id === attack.id)
+          if (idx >= 0) actions[idx] = attack
+          else actions.push(attack)
+          return { character: { ...state.character, actions } }
+        }),
+
+      removeAttack: (id) =>
+        set((state) =>
+          state.character
+            ? { character: { ...state.character, actions: (state.character.actions || []).filter((a) => a.id !== id) } }
+            : state
+        ),
+
       // ---- dice ----
       setRollMode: (rollMode) => set({ rollMode }),
 

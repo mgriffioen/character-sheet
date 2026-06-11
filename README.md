@@ -18,6 +18,8 @@ local storage) — nothing is uploaded anywhere.
 - **Tap-to-roll everything** — ability checks, saving throws, skills,
   initiative, attacks (to-hit + damage, with crits), and a free-form dice tray
   (`d4`–`d100` and expressions like `2d6+3`).
+- **Editable attacks** — add, edit, or delete any attack (name, to-hit, damage
+  dice + flat damage, type, range); an Unarmed Strike is included automatically.
 - **Advantage / disadvantage** toggle that applies to every d20 roll.
 - **Roll log** with the full breakdown of each roll (which dice, what was kept).
 - **HP management** — damage/heal, temporary HP, death saves.
@@ -38,7 +40,8 @@ and a dark "leather & parchment" theme that's easy on the eyes at the table.
   [dnd5eapi.co](https://www.dnd5eapi.co/) and [Open5e](https://open5e.com/).
 - Multiple characters / party roster.
 - Short rest, hit-dice spending, concentration tracking, conditions.
-- Customizable attacks and actions added by hand.
+- Auto-parsing of D&D Beyond weapon *customizations* (custom names + to-hit/
+  damage bonuses) so customized weapons import exactly.
 
 ---
 

@@ -110,6 +110,23 @@ test('weapon attack: finesse rapier uses DEX', () => {
   assert.equal(rapier.damage[0].bonus, 2) // dex mod
 })
 
+test('unarmed strike is added with flat damage', () => {
+  const unarmed = c.actions.find((a) => a.name === 'Unarmed Strike')
+  assert.ok(unarmed, 'expected an Unarmed Strike attack')
+  // STR 8 (-1 mod), proficiency +3 -> +2 to hit; damage flat 1 + (-1) = 0.
+  assert.equal(unarmed.toHitBonus, 2)
+  assert.equal(unarmed.damage[0].count, 0)
+  assert.equal(unarmed.damage[0].bonus, 0)
+})
+
+test('bundled ammo weight is normalized per unit', () => {
+  const arrows = c.inventory.find((i) => i.name === 'Arrows')
+  assert.ok(arrows)
+  assert.equal(arrows.quantity, 20)
+  // 1 lb per bundle of 20 -> 0.05 lb each (not 1 lb each).
+  assert.ok(Math.abs(arrows.weight - 0.05) < 1e-9)
+})
+
 test('class features filtered to level (no level-10 feature)', () => {
   const names = c.features.map((f) => f.name)
   assert.ok(names.includes('Bardic Inspiration'))
