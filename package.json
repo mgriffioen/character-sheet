@@ -1,0 +1,25 @@
+{
+  "name": "character-sheet",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "An interactive D&D 5e character sheet for tablet, with dice rolling and D&D Beyond import.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"src/**/*.test.js\"",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.3",
+    "esbuild": "^0.21.5",
+    "jsdom": "^29.1.1",
+    "vite": "^5.4.11"
+  }
+}
