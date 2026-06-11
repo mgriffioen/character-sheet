@@ -2,6 +2,14 @@ import { useState } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { getMaxHp } from '../rules/derive.js'
 
+const THEMES = [
+  { key: 'ember', label: 'Ember', bg: '#1d1813', accent: '#c2562f' },
+  { key: 'arcane', label: 'Arcane', bg: '#161833', accent: '#7b6cf0' },
+  { key: 'forest', label: 'Forest', bg: '#14201a', accent: '#4f9d56' },
+  { key: 'slate', label: 'Slate', bg: '#1a1e25', accent: '#4f93c7' },
+  { key: 'parchment', label: 'Parchment', bg: '#f2e9d4', accent: '#9a3b2a' },
+]
+
 export default function CharacterMenu({ onClose, onEditDetails }) {
   const character = useStore((s) => s.character)
   const updateCharacter = useStore((s) => s.updateCharacter)
@@ -63,6 +71,8 @@ export default function CharacterMenu({ onClose, onEditDetails }) {
             </button>
           )}
 
+          <Appearance />
+
           <button className="btn btn--primary btn--block" onClick={longRest}>
             🌙 Long Rest
           </button>
@@ -98,6 +108,58 @@ export default function CharacterMenu({ onClose, onEditDetails }) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+function Appearance() {
+  const theme = useStore((s) => s.theme)
+  const accent = useStore((s) => s.accent)
+  const setTheme = useStore((s) => s.setTheme)
+  const setAccent = useStore((s) => s.setAccent)
+
+  const current = THEMES.find((t) => t.key === theme) || THEMES[0]
+  const colorValue = accent || current.accent
+
+  return (
+    <div>
+      <label className="field" style={{ marginBottom: 6 }}>
+        <span style={{ fontSize: 12, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Appearance
+        </span>
+      </label>
+      <div className="swatches">
+        {THEMES.map((t) => (
+          <button
+            key={t.key}
+            className={`swatch-btn ${t.key === theme ? 'is-active' : ''}`}
+            onClick={() => setTheme(t.key)}
+            aria-label={`${t.label} theme`}
+          >
+            <span className="swatch" style={{ background: t.bg }}>
+              <span className="swatch__dot" style={{ background: t.accent }} />
+            </span>
+            <span className="swatch__label">{t.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="row" style={{ gap: 10, marginTop: 10, alignItems: 'center' }}>
+        <label className="row" style={{ gap: 8, alignItems: 'center' }}>
+          <input
+            type="color"
+            value={colorValue}
+            onChange={(e) => setAccent(e.target.value)}
+            aria-label="Accent color"
+            style={{ width: 38, height: 30, padding: 2, background: 'var(--bg)' }}
+          />
+          <span className="muted tiny">Accent color</span>
+        </label>
+        {accent && (
+          <button className="btn btn--sm btn--ghost" onClick={() => setAccent(null)}>
+            Reset
+          </button>
+        )}
       </div>
     </div>
   )

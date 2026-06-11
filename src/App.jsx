@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from './store/characterStore.js'
 
 import Welcome from './components/Welcome.jsx'
@@ -30,6 +30,23 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [lookupOpen, setLookupOpen] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
+
+  const theme = useStore((s) => s.theme)
+  const accent = useStore((s) => s.accent)
+
+  // Apply the chosen palette + optional custom accent to the document root,
+  // and keep the mobile browser chrome color in sync with the background.
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.theme = theme || 'ember'
+    if (accent) root.style.setProperty('--accent', accent)
+    else root.style.removeProperty('--accent')
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) {
+      const bg = getComputedStyle(root).getPropertyValue('--bg').trim()
+      if (bg) meta.setAttribute('content', bg)
+    }
+  }, [theme, accent])
 
   if (!character) {
     return (

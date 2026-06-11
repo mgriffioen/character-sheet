@@ -1,9 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { describeRoll } from '../utils/rollFormat.js'
 import RollLogSheet from './RollLogSheet.jsx'
 
 const QUICK_DICE = [4, 6, 8, 10, 12, 20, 100]
+
+// Animate the headline total when a new roll lands: briefly tumble through
+// random faces, then settle on the result with a pop. Skips the roll that's
+// already present on load, and respects prefers-reduced-motion.
+function useRollAnimation(roll) {
+  const [display, setDisplay] = useState(roll ? roll.total : null)
+  const [phase, setPhase] = useState('idle') // 'idle' | 'rolling' | 'settle'
+  const seenId = useRef(roll?.id)
+
+  useEffect(() => {
+    if (!roll || roll.id === seenId.current) return
+    seenId.current = roll.id
+
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) {
+      setPhase('idle')
+      return
+    }
+
+    setPhase('rolling')
+    const cap = roll.kind === 'd20' ? 20 : Math.max(6, Math.abs(roll.total) || 6)
+    let frames = 0
+    let settleTimer
+    const id = setInterval(() => {
+      frames += 1
+      setDisplay(1 + Math.floor(Math.random() * cap))
+      if (frames >= 8) {
+        clearInterval(id)
+        setDisplay(roll.total)
+        setPhase('settle')
+        settleTimer = setTimeout(() => setPhase('idle'), 350)
+      }
+    }, 45)
+    return () => {
+      clearInterval(id)
+      clearTimeout(settleTimer)
+    }
+  }, [roll?.id, roll?.total, roll?.kind])
+
+  // When not actively tumbling, always show the true total.
+  return { display: phase === 'rolling' ? display : roll ? roll.total : null, phase }
+}
 
 export default function DiceTray() {
   const rollMode = useStore((s) => s.rollMode)
@@ -13,7 +58,11 @@ export default function DiceTray() {
   const [logOpen, setLogOpen] = useState(false)
   const [customOpen, setCustomOpen] = useState(false)
 
-  const lastClass = lastRoll?.isNat20 ? 'nat20' : lastRoll?.isNat1 ? 'nat1' : ''
+  const { display, phase } = useRollAnimation(lastRoll)
+  const natClass =
+    phase !== 'rolling' ? (lastRoll?.isNat20 ? 'nat20' : lastRoll?.isNat1 ? 'nat1' : '') : ''
+  const motionClass = phase === 'rolling' ? 'is-rolling' : phase === 'settle' ? 'settle' : ''
+  const lastClass = `${natClass} ${motionClass}`.trim()
 
   return (
     <>
@@ -49,9 +98,11 @@ export default function DiceTray() {
           <button className="last-roll" onClick={() => setLogOpen(true)}>
             {lastRoll ? (
               <>
-                <span className={`last-roll__total ${lastClass}`}>{lastRoll.total}</span>
+                <span className={`last-roll__total ${lastClass}`}>{display}</span>
                 <span className="last-roll__meta">
-                  <span className="last-roll__label">{lastRoll.label}</span>
+                  <span className="last-roll__label">
+                    {phase === 'rolling' ? 'Rolling…' : lastRoll.label}
+                  </span>
                   <span className="last-roll__detail">{describeRoll(lastRoll)}</span>
                 </span>
               </>

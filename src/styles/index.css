@@ -32,6 +32,87 @@
   color-scheme: dark;
 }
 
+/* ----- Theme palettes (applied via [data-theme] on <html>) ----- */
+/* "ember" is the default :root palette above. */
+
+[data-theme='arcane'] {
+  --bg: #0f1020;
+  --bg-2: #161833;
+  --surface: #1c1f3c;
+  --surface-2: #242746;
+  --surface-3: #2e3358;
+  --border: #3b406a;
+  --border-soft: #2d3255;
+  --text: #ece9fb;
+  --text-dim: #b6b4dc;
+  --text-faint: #8483b3;
+  --accent: #7b6cf0;
+  --accent-soft: #4a3fa6;
+  --gold: #8ab4f8;
+  --good: #5fb38f;
+  --bad: #e0636e;
+  --info: #6aa6e0;
+}
+
+[data-theme='forest'] {
+  --bg: #0e150f;
+  --bg-2: #14201a;
+  --surface: #18271d;
+  --surface-2: #1f3326;
+  --surface-3: #294230;
+  --border: #37543d;
+  --border-soft: #2a4231;
+  --text: #eaf3e6;
+  --text-dim: #b3c6ad;
+  --text-faint: #80987c;
+  --accent: #4f9d56;
+  --accent-soft: #336137;
+  --gold: #d0a24f;
+  --good: #6fae5a;
+  --bad: #d0584a;
+  --info: #5a98a8;
+}
+
+[data-theme='slate'] {
+  --bg: #14171c;
+  --bg-2: #1a1e25;
+  --surface: #20252e;
+  --surface-2: #272d38;
+  --surface-3: #323a47;
+  --border: #3d4654;
+  --border-soft: #303846;
+  --text: #e8edf4;
+  --text-dim: #aeb8c6;
+  --text-faint: #7d8898;
+  --accent: #4f93c7;
+  --accent-soft: #355f82;
+  --gold: #c9a85f;
+  --good: #62a98a;
+  --bad: #d05f54;
+  --info: #5a92b8;
+}
+
+[data-theme='parchment'] {
+  color-scheme: light;
+  --bg: #ece1c9;
+  --bg-2: #f2e9d4;
+  --surface: #f6efdc;
+  --surface-2: #ede2c6;
+  --surface-3: #e3d5b3;
+  --border: #cbba92;
+  --border-soft: #d8c9a4;
+  --text: #2c241a;
+  --text-dim: #5c4f3b;
+  --text-faint: #897a5f;
+  --accent: #9a3b2a;
+  --accent-soft: #b9694f;
+  --gold: #927019;
+  --good: #4f8a3f;
+  --bad: #b23b2d;
+  --info: #3f72a0;
+  --shadow: 0 4px 14px rgba(80, 60, 30, 0.25);
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -507,6 +588,51 @@ h1, h2, h3, h4 {
 .last-roll__total.nat1 {
   color: var(--bad);
 }
+.last-roll__total.is-rolling {
+  opacity: 0.75;
+  filter: blur(0.5px);
+}
+.last-roll__total.settle {
+  animation: roll-pop 0.35s ease;
+}
+.last-roll__total.settle.nat20 {
+  text-shadow: 0 0 14px var(--good);
+}
+.last-roll__total.settle.nat1 {
+  animation: roll-shake 0.35s ease;
+}
+@keyframes roll-pop {
+  0% {
+    transform: scale(1.35);
+  }
+  55% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes roll-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  60% {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .last-roll__total.is-rolling {
+    opacity: 1;
+    filter: none;
+  }
+  .last-roll__total.settle {
+    animation: none;
+  }
+}
 .last-roll__meta {
   min-width: 0;
 }
@@ -921,6 +1047,48 @@ details.collapser[open] > summary {
   color: var(--bad);
 }
 
+/* Theme swatches */
+.swatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.swatch-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.swatch {
+  width: 46px;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  position: relative;
+}
+.swatch-btn.is-active .swatch {
+  border-color: var(--text);
+}
+.swatch__dot {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.swatch__label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.swatch-btn.is-active .swatch__label {
+  color: var(--text);
+}
+
 /* ---------- Full-screen sheet (compendium, character editor) ---------- */
 
 .fsheet {
@@ -1065,5 +1233,36 @@ details.collapser[open] > summary {
 @media (max-width: 360px) {
   .header__stats {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Wide / landscape layout ----------
+   Portrait stays a single column. On wider viewports (landscape tablets,
+   desktop) the app widens and the sheet flows into two balanced columns so
+   the extra horizontal space is used. */
+@media (min-width: 900px) {
+  .app {
+    max-width: 1180px;
+  }
+  .app__scroll {
+    column-count: 2;
+    column-gap: 14px;
+  }
+  .app__scroll > * {
+    break-inside: avoid;
+    margin-bottom: 12px;
+  }
+  /* The compendium/editor get a roomier reading width too. */
+  .fsheet {
+    max-width: 980px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .app {
+    max-width: 1500px;
+  }
+  .app__scroll {
+    column-count: 3;
   }
 }

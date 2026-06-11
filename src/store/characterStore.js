@@ -16,6 +16,12 @@ export const useStore = create(
       rollMode: 'normal', // 'normal' | 'advantage' | 'disadvantage'
       rollLog: [],
       activeTab: 'skills',
+      theme: 'ember', // preset palette key
+      accent: null, // optional custom accent color (overrides the theme's)
+
+      // ---- appearance ----
+      setTheme: (theme) => set({ theme }),
+      setAccent: (accent) => set({ accent: accent || null }),
 
       // ---- character lifecycle ----
       setCharacter: (character) => set({ character, activeTab: 'skills' }),
@@ -208,6 +214,8 @@ export const useStore = create(
         rollMode: state.rollMode,
         rollLog: state.rollLog.slice(0, 20),
         activeTab: state.activeTab,
+        theme: state.theme,
+        accent: state.accent,
       }),
     }
   )

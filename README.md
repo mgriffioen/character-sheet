@@ -37,9 +37,14 @@ local storage) — nothing is uploaded anywhere.
 - **Editable & overridable** — every derived value can be hand-tweaked if the
   import doesn't match (homebrew, unusual items), and your override sticks.
 - **Export / backup** your character as JSON to move it between devices.
+- **Make it yours** — five color themes (Ember, Arcane, Forest, Slate, and a
+  light Parchment) plus a custom accent color, and an animated dice roll. Pick
+  them under ☰ → Appearance.
 
-Built for **portrait tablet** use: large touch targets, a persistent dice tray,
-and a dark "leather & parchment" theme that's easy on the eyes at the table.
+Built **tablet-first (portrait)** with large touch targets and a persistent
+dice tray — and it now **adapts to landscape and desktop** widths with a
+two-column layout, so it looks right however you (or anyone you share it with)
+hold the screen. Respects `prefers-reduced-motion`.
 
 ## Roadmap (planned)
 

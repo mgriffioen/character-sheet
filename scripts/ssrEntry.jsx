@@ -12,6 +12,14 @@ export async function run() {
   globalThis.document = dom.window.document
   globalThis.localStorage = dom.window.localStorage
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
+  // jsdom has no matchMedia; report reduced motion so the dice tumble animation
+  // (timer-driven) stays inert during the test.
+  dom.window.matchMedia = () => ({
+    matches: true,
+    media: '',
+    addEventListener() {},
+    removeEventListener() {},
+  })
 
   const React = (await import('react')).default
   const { act } = await import('react')
@@ -154,6 +162,21 @@ export async function run() {
     'editing class level to 9 should raise proficiency bonus to +4'
   )
   console.log('  ✓ editor      class/level edit updates derived stats')
+
+  // Theme: changing the palette + accent applies to the document root.
+  await act(async () => useStore.getState().setTheme('arcane'))
+  assert(dom.window.document.documentElement.dataset.theme === 'arcane', 'theme not applied to root')
+  await act(async () => useStore.getState().setAccent('#ff0000'))
+  assert(
+    dom.window.document.documentElement.style.getPropertyValue('--accent') === '#ff0000',
+    'custom accent not applied to root'
+  )
+  await act(async () => useStore.getState().setAccent(null))
+  assert(
+    dom.window.document.documentElement.style.getPropertyValue('--accent') === '',
+    'accent not cleared'
+  )
+  console.log('  ✓ theme       palette + accent apply to root')
 
   await act(async () => root.unmount())
   dom.window.close()
