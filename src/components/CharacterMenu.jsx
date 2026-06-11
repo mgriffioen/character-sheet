@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { getMaxHp } from '../rules/derive.js'
 
-export default function CharacterMenu({ onClose }) {
+export default function CharacterMenu({ onClose, onEditDetails }) {
   const character = useStore((s) => s.character)
   const updateCharacter = useStore((s) => s.updateCharacter)
   const clearCharacter = useStore((s) => s.clearCharacter)
@@ -56,6 +56,12 @@ export default function CharacterMenu({ onClose }) {
             <label>Name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveName} />
           </div>
+
+          {onEditDetails && (
+            <button className="btn btn--block" onClick={onEditDetails}>
+              ✎ Edit class, race &amp; proficiencies
+            </button>
+          )}
 
           <button className="btn btn--primary btn--block" onClick={longRest}>
             🌙 Long Rest

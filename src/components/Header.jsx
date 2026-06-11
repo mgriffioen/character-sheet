@@ -10,7 +10,7 @@ import {
 } from '../rules/derive.js'
 import { signed } from '../rules/dnd.js'
 
-export default function Header({ onMenu, onLookup }) {
+export default function Header({ onMenu, onLookup, onEdit }) {
   const character = useStore((s) => s.character)
   const rollCheck = useStore((s) => s.rollCheck)
   const setActiveTab = useStore((s) => s.setActiveTab)
@@ -31,12 +31,12 @@ export default function Header({ onMenu, onLookup }) {
         ) : (
           <div className="header__avatar" aria-hidden />
         )}
-        <div className="header__id">
-          <div className="header__name">{character.name}</div>
-          <div className="header__sub">
-            {subtitle || `Level ${totalLevel(character)}`}
+        <button className="header__id" onClick={onEdit} aria-label="Edit character details">
+          <div className="header__name">
+            {character.name} <span className="edit-glyph">✎</span>
           </div>
-        </div>
+          <div className="header__sub">{subtitle || `Level ${totalLevel(character)}`}</div>
+        </button>
         <button
           className="header__menu-btn"
           onClick={onLookup}

@@ -30,6 +30,10 @@ local storage) — nothing is uploaded anywhere.
 - **Spell slots & spellcasting** — save DC, attack bonus, tap to expend slots,
   spells grouped by level with full descriptions.
 - **Long rest** — restores HP, spell slots, death saves, and half your hit dice.
+- **Editable character details** — tap your name to edit class/level, race,
+  background, alignment, speed, per-class spellcasting ability, and proficiency
+  lists (languages/armor/weapons/tools). Changing class or level recomputes
+  proficiency bonus, saves, and skills automatically.
 - **Editable & overridable** — every derived value can be hand-tweaked if the
   import doesn't match (homebrew, unusual items), and your override sticks.
 - **Export / backup** your character as JSON to move it between devices.
@@ -41,7 +45,6 @@ and a dark "leather & parchment" theme that's easy on the eyes at the table.
 
 - A guided character builder (pick race/class/background, level up) on top of
   the compendium, for fully D&D-Beyond-free character creation.
-- Editable class/level, race, and proficiencies directly on the sheet.
 - Multiple characters / party roster.
 - Short rest, hit-dice spending, concentration tracking, conditions.
 - Auto-parsing of D&D Beyond weapon *customizations* (custom names + to-hit/

@@ -130,7 +130,30 @@ export async function run() {
     useStore.getState().character.spellcasting.spells.some((s) => s.name === 'Fireball'),
     'spell was not added from the compendium'
   )
+  // Close the compendium overlay.
+  await act(async () =>
+    [...container.querySelectorAll('.fsheet button')].find((b) => b.textContent.trim() === 'Close').click()
+  )
   console.log('  ✓ compendium  search + add works')
+
+  // Character editor: open it and confirm a level change updates derived stats.
+  const { getProficiencyBonus } = await import('../src/rules/derive.js')
+  assert(getProficiencyBonus(useStore.getState().character) === 3, 'sanity: bard 5 should be +3')
+  await act(async () => container.querySelector('[aria-label="Edit character details"]').click())
+  assert(container.textContent.includes('Character Details'), 'character editor did not open')
+  assert(container.textContent.includes('Bard'), 'editor did not show the current class')
+
+  const lvlInput = container.querySelector('.class-edit input[inputmode="numeric"]')
+  const nativeSetter = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set
+  await act(async () => {
+    nativeSetter.call(lvlInput, '9')
+    lvlInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }))
+  })
+  assert(
+    getProficiencyBonus(useStore.getState().character) === 4,
+    'editing class level to 9 should raise proficiency bonus to +4'
+  )
+  console.log('  ✓ editor      class/level edit updates derived stats')
 
   await act(async () => root.unmount())
   dom.window.close()

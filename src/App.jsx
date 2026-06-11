@@ -7,6 +7,7 @@ import Tabs from './components/Tabs.jsx'
 import DiceTray from './components/DiceTray.jsx'
 import CharacterMenu from './components/CharacterMenu.jsx'
 import LookupSheet from './components/LookupSheet.jsx'
+import CharacterEditor from './components/CharacterEditor.jsx'
 
 import SkillsTab from './tabs/SkillsTab.jsx'
 import CombatTab from './tabs/CombatTab.jsx'
@@ -28,6 +29,7 @@ export default function App() {
   const setActiveTab = useStore((s) => s.setActiveTab)
   const [menuOpen, setMenuOpen] = useState(false)
   const [lookupOpen, setLookupOpen] = useState(false)
+  const [editorOpen, setEditorOpen] = useState(false)
 
   if (!character) {
     return (
@@ -41,14 +43,27 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header onMenu={() => setMenuOpen(true)} onLookup={() => setLookupOpen(true)} />
+      <Header
+        onMenu={() => setMenuOpen(true)}
+        onLookup={() => setLookupOpen(true)}
+        onEdit={() => setEditorOpen(true)}
+      />
       <Tabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
       <div className="app__scroll" key={activeTab}>
         <Active />
       </div>
       <DiceTray />
-      {menuOpen && <CharacterMenu onClose={() => setMenuOpen(false)} />}
+      {menuOpen && (
+        <CharacterMenu
+          onClose={() => setMenuOpen(false)}
+          onEditDetails={() => {
+            setMenuOpen(false)
+            setEditorOpen(true)
+          }}
+        />
+      )}
       {lookupOpen && <LookupSheet onClose={() => setLookupOpen(false)} />}
+      {editorOpen && <CharacterEditor onClose={() => setEditorOpen(false)} />}
     </div>
   )
 }

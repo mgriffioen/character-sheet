@@ -40,8 +40,8 @@ export default function LookupSheet({ onClose }) {
     : list
 
   return (
-    <div className="lookup">
-      <div className="lookup__head">
+    <div className="fsheet">
+      <div className="fsheet__head">
         <h3>Compendium</h3>
         <span className="faint tiny">SRD via dnd5eapi.co</span>
         <span className="spacer" />
@@ -76,7 +76,7 @@ export default function LookupSheet({ onClose }) {
         </div>
       )}
 
-      <div className="lookup__body">
+      <div className="fsheet__body">
         {selected ? (
           <Detail entry={selected} category={category} onBack={() => setSelected(null)} />
         ) : loading ? (
