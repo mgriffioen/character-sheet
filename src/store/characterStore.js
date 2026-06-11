@@ -100,6 +100,45 @@ export const useStore = create(
             : state
         ),
 
+      // ---- spells & inventory (add/remove, e.g. from the compendium) ----
+      addSpell: (spell) =>
+        set((state) => {
+          if (!state.character) return state
+          const sc = state.character.spellcasting || { spells: [], slots: {} }
+          return {
+            character: {
+              ...state.character,
+              spellcasting: { ...sc, spells: [...(sc.spells || []), spell] },
+            },
+          }
+        }),
+
+      removeSpell: (id) =>
+        set((state) => {
+          if (!state.character) return state
+          const sc = state.character.spellcasting || { spells: [], slots: {} }
+          return {
+            character: {
+              ...state.character,
+              spellcasting: { ...sc, spells: (sc.spells || []).filter((s) => s.id !== id) },
+            },
+          }
+        }),
+
+      addInventoryItem: (item) =>
+        set((state) =>
+          state.character
+            ? { character: { ...state.character, inventory: [...(state.character.inventory || []), item] } }
+            : state
+        ),
+
+      removeInventoryItem: (id) =>
+        set((state) =>
+          state.character
+            ? { character: { ...state.character, inventory: (state.character.inventory || []).filter((i) => i.id !== id) } }
+            : state
+        ),
+
       // ---- dice ----
       setRollMode: (rollMode) => set({ rollMode }),
 

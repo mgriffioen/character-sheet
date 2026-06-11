@@ -91,6 +91,47 @@ export async function run() {
   assert(!container.textContent.includes('Test Blade'), 'attack was not removed')
   console.log('  ✓ attacks     add/remove works')
 
+  // Compendium: stub the SRD API, open it, find a spell, and add it.
+  const tick = () => act(async () => new Promise((r) => setTimeout(r, 0)))
+  globalThis.fetch = async (url) => {
+    const u = String(url)
+    const json = u.endsWith('/api/spells')
+      ? { count: 1, results: [{ index: 'fireball', name: 'Fireball', url: '/api/spells/fireball' }] }
+      : u.endsWith('/api/spells/fireball')
+      ? {
+          index: 'fireball',
+          name: 'Fireball',
+          level: 3,
+          desc: ['A bright streak flashes from your finger.'],
+          school: { name: 'Evocation' },
+          casting_time: '1 action',
+          range: '150 feet',
+          duration: 'Instantaneous',
+          components: ['V', 'S', 'M'],
+          concentration: false,
+          ritual: false,
+        }
+      : { count: 0, results: [] }
+    return { ok: true, status: 200, json: async () => json }
+  }
+
+  await act(async () => container.querySelector('[aria-label="Open compendium"]').click())
+  await tick()
+  assert(container.textContent.includes('Fireball'), 'compendium spell list did not render')
+
+  const row = [...container.querySelectorAll('.lookup__row')].find((b) => b.textContent.includes('Fireball'))
+  await act(async () => row.click())
+  await tick()
+  assert(container.textContent.includes('Evocation'), 'compendium detail did not render')
+
+  const addBtn = [...container.querySelectorAll('button')].find((b) => b.textContent.includes('Add to my spells'))
+  await act(async () => addBtn.click())
+  assert(
+    useStore.getState().character.spellcasting.spells.some((s) => s.name === 'Fireball'),
+    'spell was not added from the compendium'
+  )
+  console.log('  ✓ compendium  search + add works')
+
   await act(async () => root.unmount())
   dom.window.close()
   console.log('Render smoke test passed.')

@@ -107,6 +107,7 @@ function SlotDots({ max, used, onChange }) {
 }
 
 function SpellRow({ spell, slot, onCast }) {
+  const removeSpell = useStore((s) => s.removeSpell)
   const paragraphs = toParagraphs(spell.description)
   const canCast = slot && spell.level > 0
   return (
@@ -125,6 +126,14 @@ function SpellRow({ spell, slot, onCast }) {
             Cast
           </button>
         )}
+        <button
+          className="iconbtn"
+          aria-label={`Remove ${spell.name}`}
+          title="Remove spell"
+          onClick={() => removeSpell(spell.id)}
+        >
+          ✕
+        </button>
       </div>
       <div className="spell-meta">
         {spell.school && <span>{spell.school}</span>}

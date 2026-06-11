@@ -21,6 +21,7 @@ const RARITY_CLASS = {
 export default function InventoryTab() {
   const character = useStore((s) => s.character)
   const updateCharacter = useStore((s) => s.updateCharacter)
+  const removeInventoryItem = useStore((s) => s.removeInventoryItem)
 
   const setCoin = (key, raw) => {
     const value = raw === '' ? 0 : parseInt(raw, 10) || 0
@@ -87,6 +88,14 @@ export default function InventoryTab() {
                     onClick={() => toggleEquip(item.id)}
                   >
                     {item.equipped ? 'Equipped' : 'Equip'}
+                  </button>
+                  <button
+                    className="iconbtn"
+                    aria-label={`Remove ${item.name}`}
+                    title="Remove item"
+                    onClick={() => removeInventoryItem(item.id)}
+                  >
+                    ✕
                   </button>
                 </div>
                 {paragraphs.length > 0 && (

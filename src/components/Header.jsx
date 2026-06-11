@@ -10,7 +10,7 @@ import {
 } from '../rules/derive.js'
 import { signed } from '../rules/dnd.js'
 
-export default function Header({ onMenu }) {
+export default function Header({ onMenu, onLookup }) {
   const character = useStore((s) => s.character)
   const rollCheck = useStore((s) => s.rollCheck)
   const setActiveTab = useStore((s) => s.setActiveTab)
@@ -37,6 +37,14 @@ export default function Header({ onMenu }) {
             {subtitle || `Level ${totalLevel(character)}`}
           </div>
         </div>
+        <button
+          className="header__menu-btn"
+          onClick={onLookup}
+          aria-label="Open compendium"
+          title="Look up spells, items & rules"
+        >
+          🔍
+        </button>
         <button className="header__menu-btn" onClick={onMenu} aria-label="Menu">
           ☰
         </button>
