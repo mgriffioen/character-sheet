@@ -85,11 +85,14 @@ D&D Beyond has no official API, but a character's raw data is available as JSON.
 The export is **uncomputed** (no final AC/HP/save totals), so this app replays
 the 5e math to produce the sheet.
 
-1. Find your character ID — the number in your sheet URL:
+1. On D&D Beyond, open your character → the **gear / "Manage"** menu → set
+   **Character Privacy** to **Public**. Without this, the link below returns
+   `403 Forbidden`.
+2. Find your character ID — the number in your sheet URL:
    `dndbeyond.com/characters/`**`12345678`**
-2. Open (the character must be set to **public**):
+3. Open (now public):
    `https://character-service.dndbeyond.com/character/v5/character/12345678`
-3. Copy all of that JSON and paste it into the app's import screen (or save it
+4. Copy all of that JSON and paste it into the app's import screen (or save it
    as a `.json` file and upload it).
 
 Not sure yet? Hit **"Try a sample character"** to explore the app with a fully

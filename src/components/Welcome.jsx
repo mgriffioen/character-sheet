@@ -72,11 +72,17 @@ export default function Welcome() {
         <div className="callout">
           <strong>How to get your character JSON:</strong>
           <ol style={{ margin: '8px 0 0', paddingLeft: 18 }}>
-            <li>Find your character ID — the number in your sheet's URL: <br />
+            <li>
+              On D&amp;D Beyond, open your character → the <b>gear / “Manage”</b> menu →
+              set <b>Character Privacy</b> to <b>Public</b>. (Without this, the link
+              below returns “403 Forbidden”.)
+            </li>
+            <li>
+              Find your character ID — the number in your sheet's URL:<br />
               <code>dndbeyond.com/characters/<b>12345678</b></code>
             </li>
             <li>
-              Open this URL (character must be public):<br />
+              Open this URL in your browser:<br />
               <code>character-service.dndbeyond.com/character/v5/character/12345678</code>
             </li>
             <li>Select all of the page text, copy it, and paste it below.</li>
