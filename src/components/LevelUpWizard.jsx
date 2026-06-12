@@ -10,7 +10,7 @@ import {
   levelUpCharacter,
 } from '../srd/levelUp.js'
 import { rollDie } from '../dice/dice.js'
-import { cryptoId } from '../model/character.js'
+import { subclassFeatureModels } from '../srd/adapters.js'
 import { ABILITIES, ABILITY_NAMES, abilityModifier, signed } from '../rules/dnd.js'
 
 export default function LevelUpWizard({ onClose }) {
@@ -101,7 +101,8 @@ export default function LevelUpWizard({ onClose }) {
     onClose()
   }
 
-  // Pick a subclass and fetch its features up to the new level (best-effort).
+  // Pick a subclass and fetch its features (with descriptions) up to the new
+  // level (best-effort).
   const pickSubclass = async (sc) => {
     if (subclass === sc.name) {
       setSubclass('')
@@ -111,17 +112,7 @@ export default function LevelUpWizard({ onClose }) {
     setSubclass(sc.name)
     setSubclassFeatures([])
     try {
-      const levels = await srdDetail(`/api/subclasses/${sc.index}/levels`)
-      if (Array.isArray(levels)) {
-        const feats = []
-        for (const lvl of levels) {
-          if ((lvl.level || 0) > newLevel) continue
-          for (const f of lvl.features || []) {
-            if (f.name) feats.push({ id: cryptoId(), name: f.name, source: sc.name, level: lvl.level, description: '' })
-          }
-        }
-        setSubclassFeatures(feats)
-      }
+      setSubclassFeatures(await subclassFeatureModels(sc.index, sc.name, newLevel))
     } catch {
       /* keep the subclass name even if features can't be fetched */
     }

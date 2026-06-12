@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/characterStore.js'
-import { SRD_CATEGORIES, categoryList, categoryDetail, srdDetail } from '../srd/api.js'
-import { srdSpellToModel, srdItemToModel, srdFeatureToModel, open5eFeatToModel } from '../srd/adapters.js'
-import { totalLevel, cryptoId } from '../model/character.js'
+import { SRD_CATEGORIES, categoryList, categoryDetail } from '../srd/api.js'
+import { srdSpellToModel, srdItemToModel, srdFeatureToModel, open5eFeatToModel, subclassFeatureModels } from '../srd/adapters.js'
+import { totalLevel } from '../model/character.js'
 import { toParagraphs } from '../utils/text.js'
 
 const ADD_LABELS = {
@@ -167,7 +167,7 @@ function Detail({ entry, category, onBack }) {
   }
 
   // Set the subclass name on the matching class and pull in its features
-  // (best-effort) up to the character's level.
+  // (with descriptions, best-effort) up to the character's level.
   const addSubclass = async () => {
     const className = data.class?.name
     updateCharacter((c) => ({
@@ -177,16 +177,8 @@ function Detail({ entry, category, onBack }) {
       ),
     }))
     try {
-      const levels = await srdDetail(`/api/subclasses/${data.index}/levels`)
-      if (Array.isArray(levels)) {
-        const maxLevel = totalLevel(character)
-        for (const lvl of levels) {
-          if ((lvl.level || 0) > maxLevel) continue
-          for (const f of lvl.features || []) {
-            if (f.name) upsertFeature({ id: cryptoId(), name: f.name, source: data.name, level: lvl.level, description: '' })
-          }
-        }
-      }
+      const feats = await subclassFeatureModels(data.index, data.name, totalLevel(character))
+      for (const f of feats) upsertFeature(f)
     } catch {
       /* keep the subclass name even if features can't be fetched */
     }

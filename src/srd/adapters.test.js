@@ -1,7 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { srdSpellToModel, srdItemToModel, srdFeatureToModel, open5eFeatToModel } from './adapters.js'
+import { srdSpellToModel, srdItemToModel, srdFeatureToModel, open5eFeatToModel, subclassFeatureModels } from './adapters.js'
+import { _clearSrdMemoryCache } from './api.js'
+
+const jsonRes = (obj) => ({ ok: true, status: 200, json: async () => obj })
 
 const fireball = {
   index: 'fireball',
@@ -65,6 +68,34 @@ test('open5eFeatToModel maps a feat with prerequisite', () => {
   assert.equal(m.source, 'Feat')
   assert.ok(m.description.includes('Prerequisite: Dexterity 13'))
   assert.ok(m.description.includes('mastered ranged'))
+})
+
+test('subclassFeatureModels enriches features with descriptions, honoring maxLevel', async () => {
+  globalThis.localStorage = undefined // exercise the no-storage path (caching is best-effort)
+  _clearSrdMemoryCache()
+  const levels = [
+    { level: 3, features: [{ index: 'cutting-words', name: 'Cutting Words', url: '/api/features/cutting-words' }] },
+    { level: 6, features: [{ index: 'magical-secrets', name: 'Additional Magical Secrets', url: '/api/features/magical-secrets' }] },
+  ]
+  const detail = { '/api/features/cutting-words': { desc: ['You learn to twist a creature’s own words against it.'] } }
+  const fetched = []
+  globalThis.fetch = async (url) => {
+    const path = String(url).replace(/^https?:\/\/[^/]+/, '')
+    fetched.push(path)
+    if (path.endsWith('/api/subclasses/lore/levels')) return jsonRes(levels)
+    if (detail[path]) return jsonRes(detail[path])
+    throw new Error(`unexpected url ${path}`)
+  }
+
+  const feats = await subclassFeatureModels('lore', 'College of Lore', 5)
+
+  assert.equal(feats.length, 1) // the level-6 feature is excluded at maxLevel 5
+  assert.equal(feats[0].name, 'Cutting Words')
+  assert.equal(feats[0].source, 'College of Lore')
+  assert.equal(feats[0].level, 3)
+  assert.ok(feats[0].description.includes('twist'))
+  assert.ok(feats[0].id) // gets a real id, not name-only
+  assert.ok(!fetched.includes('/api/features/magical-secrets')) // never fetched beyond maxLevel
 })
 
 test('srdItemToModel maps a magic item with rarity', () => {

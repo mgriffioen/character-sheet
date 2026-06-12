@@ -2,6 +2,7 @@
 // can be added straight to a character.
 
 import { cryptoId } from '../model/character.js'
+import { srdDetail } from './api.js'
 
 function joinDesc(desc) {
   if (Array.isArray(desc)) return desc.join('\n\n')
@@ -42,6 +43,36 @@ export function srdFeatureToModel(f) {
     level: f.level ?? null,
     description: joinDesc(f.desc),
   }
+}
+
+// Build feature models for a subclass up to `maxLevel`, each enriched with its
+// full description. The subclass-levels endpoint only yields feature references
+// ({index,name,url}), so we fetch each one's detail for `desc`. Detail fetches
+// run in parallel and are cached; a feature whose detail can't be reached is
+// kept name-only so the rest still come through.
+export async function subclassFeatureModels(subclassIndex, subclassName, maxLevel) {
+  const levels = await srdDetail(`/api/subclasses/${subclassIndex}/levels`)
+  if (!Array.isArray(levels)) return []
+  const refs = []
+  for (const lvl of levels) {
+    if ((lvl.level || 0) > maxLevel) continue
+    for (const f of lvl.features || []) {
+      if (f.name) refs.push({ name: f.name, url: f.url, level: lvl.level })
+    }
+  }
+  return Promise.all(
+    refs.map(async (ref) => {
+      let description = ''
+      if (ref.url) {
+        try {
+          description = joinDesc((await srdDetail(ref.url)).desc)
+        } catch {
+          /* keep this feature name-only */
+        }
+      }
+      return { id: cryptoId(), name: ref.name, source: subclassName, level: ref.level, description }
+    })
+  )
 }
 
 // Open5e feat -> internal feature model.
