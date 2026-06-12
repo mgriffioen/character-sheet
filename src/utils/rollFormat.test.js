@@ -36,3 +36,27 @@ test('rollVisual: flat hit (no dice) has no die shape', () => {
   assert.equal(v.sides, null)
   assert.equal(v.total, 2)
 })
+
+test('rollVisual: advantage exposes both faces and keeps the higher', () => {
+  const v = rollVisual({ kind: 'd20', dice: [7, 18], kept: 18, total: 21, mode: 'advantage' })
+  assert.deepEqual(v.faces, [7, 18])
+  assert.equal(v.kept, 18)
+  assert.equal(v.dropped, 7)
+  assert.equal(v.diceCount, 2)
+})
+
+test('rollVisual: disadvantage drops the higher face', () => {
+  const v = rollVisual({ kind: 'd20', dice: [7, 18], kept: 7, total: 9, mode: 'disadvantage' })
+  assert.equal(v.dropped, 18)
+  assert.equal(v.diceCount, 2)
+})
+
+test('rollVisual: diceCount counts dice across a formula', () => {
+  const v = rollVisual({
+    kind: 'formula',
+    total: 24,
+    breakdown: [{ kind: 'dice', sign: 1, count: 8, sides: 6, rolls: [1, 2, 3, 4, 5, 6, 1, 2] }],
+  })
+  assert.equal(v.diceCount, 8)
+  assert.equal(v.sides, 6)
+})

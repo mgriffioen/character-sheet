@@ -75,6 +75,15 @@ export async function run() {
   assert(container.querySelector('svg.die'), 'shaped die did not render in the tray')
   console.log('  ✓ rolling     works (logged a d20, shaped die shown)')
 
+  // Advantage shows both d20s in the tray.
+  await act(async () => {
+    useStore.getState().setRollMode('advantage')
+    useStore.getState().rollCheck({ label: 'Athletics', modifier: 3, type: 'skill' })
+  })
+  assert(container.querySelectorAll('.tray svg.die').length === 2, 'advantage should render two dice')
+  await act(async () => useStore.getState().setRollMode('normal'))
+  console.log('  ✓ adv dice    shows both d20s')
+
   await act(async () => {
     useStore.getState().adjustHp(-10)
   })

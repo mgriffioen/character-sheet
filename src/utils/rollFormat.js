@@ -49,38 +49,50 @@ export function rollVisual(entry) {
   if (!entry) return { sides: null, dieValue: null, total: null }
 
   if (entry.kind === 'd20') {
-    return { sides: 20, dieValue: entry.kept, total: entry.total }
+    const faces = entry.dice || [entry.kept]
+    const isPair = faces.length === 2
+    return {
+      sides: 20,
+      dieValue: entry.kept,
+      total: entry.total,
+      diceCount: faces.length,
+      // For advantage/disadvantage: both faces, plus which was kept/dropped.
+      faces: isPair ? faces : null,
+      kept: entry.kept,
+      dropped: isPair ? (entry.mode === 'advantage' ? Math.min(...faces) : Math.max(...faces)) : null,
+      mode: entry.mode,
+    }
   }
 
   if (entry.kind === 'formula') {
     let sides = null
     let sum = 0
-    let hasDice = false
+    let count = 0
     for (const t of entry.breakdown || []) {
       if (t.kind === 'dice') {
-        hasDice = true
+        count += t.count
         sides = Math.max(sides ?? 0, t.sides)
         sum += t.rolls.reduce((a, b) => a + b, 0) * (t.sign < 0 ? -1 : 1)
       }
     }
-    return { sides: hasDice ? sides : null, dieValue: hasDice ? sum : null, total: entry.total }
+    return { sides: count ? sides : null, dieValue: count ? sum : null, total: entry.total, diceCount: count }
   }
 
   if (entry.kind === 'damage') {
     let sides = null
     let sum = 0
-    let hasDice = false
+    let count = 0
     for (const p of entry.parts || []) {
       if (p.count > 0) {
-        hasDice = true
+        count += p.count
         sides = Math.max(sides ?? 0, p.sides)
         sum += p.rolls.reduce((a, b) => a + b, 0)
       }
     }
-    return { sides: hasDice ? sides : null, dieValue: hasDice ? sum : null, total: entry.total }
+    return { sides: count ? sides : null, dieValue: count ? sum : null, total: entry.total, diceCount: count }
   }
 
-  return { sides: null, dieValue: entry.total, total: entry.total }
+  return { sides: null, dieValue: entry.total, total: entry.total, diceCount: 0 }
 }
 
 function formatBreakdown(breakdown = []) {

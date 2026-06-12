@@ -726,6 +726,40 @@ h1, h2, h3, h4 {
 .die--fail .die__num {
   fill: var(--bad);
 }
+.die--dim {
+  opacity: 0.42;
+}
+.die--dim .die__shape,
+.die--dim .die__inner {
+  stroke: var(--text-faint);
+}
+.die--dim .die__num {
+  fill: var(--text-faint);
+}
+.dice-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.die-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.die-count {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 10px;
+  padding: 2px 5px;
+  border: 1px solid var(--bg);
+}
 .die.is-rolling {
   animation: die-spin 0.42s ease-in-out;
 }

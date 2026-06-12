@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { describeRoll, rollVisual } from '../utils/rollFormat.js'
 import RollLogSheet from './RollLogSheet.jsx'
-import Die from './Die.jsx'
+import RollDice from './RollDice.jsx'
 
 const QUICK_DICE = [4, 6, 8, 10, 12, 20, 100]
 
@@ -66,7 +66,6 @@ export default function DiceTray() {
 
   const tone = lastRoll?.isNat20 ? 'crit' : lastRoll?.isNat1 ? 'fail' : 'normal'
   const natClass = tone === 'crit' ? 'nat20' : tone === 'fail' ? 'nat1' : ''
-  const motionClass = phase === 'rolling' ? 'is-rolling' : phase === 'settle' ? 'settle' : ''
   // Show a separate total only when it differs from the natural die value.
   const showTotal = visual.dieValue != null && visual.total !== visual.dieValue
 
@@ -104,18 +103,14 @@ export default function DiceTray() {
           <button className="last-roll" onClick={() => setLogOpen(true)}>
             {lastRoll ? (
               <>
-                {visual.sides != null ? (
-                  <Die
-                    sides={visual.sides}
-                    value={display}
-                    tone={tone}
-                    size={48}
-                    rolling={phase === 'rolling'}
-                    settle={phase === 'settle'}
-                  />
-                ) : (
-                  <span className={`last-roll__total ${natClass} ${motionClass}`.trim()}>{display}</span>
-                )}
+                <RollDice
+                  visual={visual}
+                  value={display}
+                  tone={tone}
+                  size={48}
+                  rolling={phase === 'rolling'}
+                  settle={phase === 'settle'}
+                />
                 {showTotal && (
                   <span className={`last-roll__sum ${natClass}`.trim()}>
                     {phase === 'rolling' ? '' : visual.total}

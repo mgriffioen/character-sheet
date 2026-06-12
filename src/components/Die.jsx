@@ -15,7 +15,15 @@ function shapeFor(sides) {
   return SHAPES[sides] || SHAPES[20]
 }
 
-export default function Die({ sides, value, tone = 'normal', size = 46, rolling = false, settle = false }) {
+export default function Die({
+  sides,
+  value,
+  tone = 'normal',
+  size = 46,
+  rolling = false,
+  settle = false,
+  dimmed = false,
+}) {
   const s = shapeFor(sides)
   const str = String(value)
   const fontSize = str.length >= 4 ? 26 : str.length === 3 ? 34 : 46
@@ -27,7 +35,7 @@ export default function Die({ sides, value, tone = 'normal', size = 46, rolling 
       viewBox="0 0 100 100"
       width={size}
       height={size}
-      className={`die ${toneClass} ${motionClass}`.trim()}
+      className={`die ${toneClass} ${motionClass} ${dimmed ? 'die--dim' : ''}`.trim()}
       role="img"
       aria-label={`d${sides} showing ${value}`}
     >
