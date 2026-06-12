@@ -88,6 +88,31 @@ export const useStore = create(
           }
         }),
 
+      // Set the maximum slots for a spell level (0 removes the level).
+      setSlotMax: (level, max) =>
+        set((state) => {
+          if (!state.character) return state
+          const slots = { ...state.character.spellcasting.slots }
+          const m = Math.max(0, Math.min(99, Number(max) || 0))
+          if (m === 0) {
+            delete slots[level]
+          } else {
+            const cur = slots[level] || { max: 0, used: 0 }
+            slots[level] = { max: m, used: Math.min(cur.used || 0, m) }
+          }
+          return {
+            character: { ...state.character, spellcasting: { ...state.character.spellcasting, slots } },
+          }
+        }),
+
+      // Replace the whole slots map (e.g. auto-fill from a class table).
+      setAllSlots: (slots) =>
+        set((state) =>
+          state.character
+            ? { character: { ...state.character, spellcasting: { ...state.character.spellcasting, slots } } }
+            : state
+        ),
+
       // ---- attacks ----
       upsertAttack: (attack) =>
         set((state) => {

@@ -101,3 +101,33 @@ export function signed(n) {
 export function proficiencyMultiplier(profLevel) {
   return profLevel || 0
 }
+
+// Standard full-caster spell slots by character level (slots for spell levels
+// 1..9). Used to auto-fill slots for manually-built casters.
+const FULL_CASTER_SLOTS = {
+  1: [2],
+  2: [3],
+  3: [4, 2],
+  4: [4, 3],
+  5: [4, 3, 2],
+  6: [4, 3, 3],
+  7: [4, 3, 3, 1],
+  8: [4, 3, 3, 2],
+  9: [4, 3, 3, 3, 1],
+  10: [4, 3, 3, 3, 2],
+  11: [4, 3, 3, 3, 2, 1],
+  12: [4, 3, 3, 3, 2, 1],
+  13: [4, 3, 3, 3, 2, 1, 1],
+  14: [4, 3, 3, 3, 2, 1, 1],
+  15: [4, 3, 3, 3, 2, 1, 1, 1],
+  16: [4, 3, 3, 3, 2, 1, 1, 1],
+  17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
+  18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
+  19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
+  20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
+}
+
+export function fullCasterSlots(level) {
+  const lvl = Math.max(1, Math.min(20, Number(level) || 1))
+  return FULL_CASTER_SLOTS[lvl] || []
+}

@@ -179,6 +179,15 @@ export async function run() {
   )
   console.log('  ✓ theme       palette + accent apply to root')
 
+  // Spell slots: the editor entry is present and max edits apply.
+  await act(async () => useStore.getState().setActiveTab('spells'))
+  assert(container.textContent.includes('Edit spell slots'), 'slot editor button missing')
+  await act(async () => useStore.getState().setSlotMax('1', 5))
+  assert(useStore.getState().character.spellcasting.slots['1'].max === 5, 'setSlotMax did not apply')
+  await act(async () => useStore.getState().setSlotMax('1', 0))
+  assert(!useStore.getState().character.spellcasting.slots['1'], 'setting max 0 did not remove the level')
+  console.log('  ✓ slots       editable maximums work')
+
   await act(async () => root.unmount())
   dom.window.close()
   console.log('Render smoke test passed.')

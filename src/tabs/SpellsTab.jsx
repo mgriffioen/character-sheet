@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { getSpellSaveDC, getSpellAttackBonus } from '../rules/derive.js'
-import { ABILITY_NAMES, signed } from '../rules/dnd.js'
+import { ABILITY_NAMES, signed, fullCasterSlots } from '../rules/dnd.js'
+import { totalLevel } from '../model/character.js'
 import { toParagraphs } from '../utils/text.js'
 
 const LEVEL_LABEL = (lvl) => (lvl === 0 ? 'Cantrips' : `Level ${lvl}`)
@@ -8,21 +10,11 @@ const LEVEL_LABEL = (lvl) => (lvl === 0 ? 'Cantrips' : `Level ${lvl}`)
 export default function SpellsTab() {
   const character = useStore((s) => s.character)
   const setSlotUsed = useStore((s) => s.setSlotUsed)
+  const [slotsOpen, setSlotsOpen] = useState(false)
 
   const sc = { spells: [], slots: {}, ...character.spellcasting }
   const ability =
     sc.ability || character.classes?.find((c) => c.spellcastingAbility)?.spellcastingAbility || null
-
-  if (!sc.spells?.length && Object.keys(sc.slots || {}).length === 0) {
-    return (
-      <div className="card">
-        <div className="card__title">Spells</div>
-        <p className="muted" style={{ padding: '4px 14px 14px' }}>
-          No spells found. Non-casters won't have any — or import a caster from D&amp;D Beyond.
-        </p>
-      </div>
-    )
-  }
 
   // Group spells by level.
   const byLevel = {}
@@ -33,8 +25,26 @@ export default function SpellsTab() {
     (a, b) => a - b
   )
 
+  const empty = !sc.spells?.length && Object.keys(sc.slots || {}).length === 0
+
   return (
     <>
+      <div className="row" style={{ justifyContent: 'flex-end', marginBottom: 10 }}>
+        <button className="btn btn--sm" onClick={() => setSlotsOpen(true)}>
+          ⚙ Edit spell slots
+        </button>
+      </div>
+
+      {empty && (
+        <div className="card">
+          <div className="card__title">Spells</div>
+          <p className="muted" style={{ padding: '4px 14px 14px' }}>
+            No spells or slots yet. Add spells from the 🔍 compendium, set a spellcasting ability in
+            your character details, or tap <b>Edit spell slots</b> above.
+          </p>
+        </div>
+      )}
+
       {ability && (
         <div className="card">
           <div className="card__title">Spellcasting</div>
@@ -78,7 +88,71 @@ export default function SpellsTab() {
           </div>
         )
       })}
+
+      {slotsOpen && <SlotEditor onClose={() => setSlotsOpen(false)} />}
     </>
+  )
+}
+
+function SlotEditor({ onClose }) {
+  const character = useStore((s) => s.character)
+  const setSlotMax = useStore((s) => s.setSlotMax)
+  const setAllSlots = useStore((s) => s.setAllSlots)
+  const slots = character.spellcasting?.slots || {}
+  const level = totalLevel(character)
+
+  const autofill = () => {
+    const arr = fullCasterSlots(level)
+    const next = {}
+    arr.forEach((count, idx) => {
+      if (count > 0) {
+        const lvl = String(idx + 1)
+        next[lvl] = { max: count, used: Math.min(slots[lvl]?.used || 0, count) }
+      }
+    })
+    setAllSlots(next)
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet sheet--center" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__head">
+          <h3>Spell Slots</h3>
+          <button className="btn btn--sm btn--ghost" onClick={onClose}>
+            Close
+          </button>
+        </div>
+        <div className="sheet__body">
+          <p className="faint tiny" style={{ marginTop: 0 }}>
+            Set how many slots you have at each level. Used slots reset on a long rest.
+          </p>
+          <div className="slot-grid">
+            {Array.from({ length: 9 }).map((_, i) => {
+              const lvl = String(i + 1)
+              const max = slots[lvl]?.max || 0
+              return (
+                <label className="slot-row" key={lvl}>
+                  <span>Level {i + 1}</span>
+                  <input
+                    inputMode="numeric"
+                    value={max}
+                    onChange={(e) => setSlotMax(lvl, e.target.value.replace(/[^0-9]/g, ''))}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </label>
+              )
+            })}
+          </div>
+          <button className="btn btn--block" style={{ marginTop: 14 }} onClick={autofill}>
+            Auto-fill: full caster (level {level})
+          </button>
+          <p className="faint tiny">
+            Fills the standard full-caster table (Bard, Cleric, Druid, Sorcerer, Wizard). Half-casters
+            (Paladin/Ranger) and Warlock pact magic differ — tweak the numbers above to match.
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }
 

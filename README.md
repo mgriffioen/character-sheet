@@ -28,7 +28,8 @@ local storage) — nothing is uploaded anywhere.
 - **Roll log** with the full breakdown of each roll (which dice, what was kept).
 - **HP management** — damage/heal, temporary HP, death saves.
 - **Spell slots & spellcasting** — save DC, attack bonus, tap to expend slots,
-  spells grouped by level with full descriptions.
+  spells grouped by level with full descriptions. Slot maximums are editable per
+  level, with a one-tap "full-caster" auto-fill for the standard table.
 - **Long rest** — restores HP, spell slots, death saves, and half your hit dice.
 - **Editable character details** — tap your name to edit class/level, race,
   background, alignment, speed, per-class spellcasting ability, and proficiency
