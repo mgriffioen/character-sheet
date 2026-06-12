@@ -33,7 +33,30 @@ export function srdSpellToModel(s, ability = null) {
   }
 }
 
-// SRD equipment or magic item -> internal inventory item model.
+// SRD class/subclass feature -> internal feature model.
+export function srdFeatureToModel(f) {
+  return {
+    id: cryptoId(),
+    name: f.name || 'Feature',
+    source: f.class?.name || f.subclass?.name || 'Feature',
+    level: f.level ?? null,
+    description: joinDesc(f.desc),
+  }
+}
+
+// Open5e feat -> internal feature model.
+export function open5eFeatToModel(feat) {
+  const prereq = feat.prerequisite ? `Prerequisite: ${feat.prerequisite}\n\n` : ''
+  const effects = Array.isArray(feat.effects_desc) ? feat.effects_desc.join('\n\n') : ''
+  return {
+    id: cryptoId(),
+    name: feat.name || 'Feat',
+    source: 'Feat',
+    level: null,
+    description: prereq + (feat.desc || '') + (effects ? `\n\n${effects}` : ''),
+  }
+}
+
 export function srdItemToModel(it) {
   const categoryIndex = it.equipment_category?.index
   const isWeapon = categoryIndex === 'weapon' || !!it.damage

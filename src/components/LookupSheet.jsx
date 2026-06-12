@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/characterStore.js'
-import { SRD_CATEGORIES, srdList, srdDetail } from '../srd/api.js'
-import { srdSpellToModel, srdItemToModel } from '../srd/adapters.js'
+import { SRD_CATEGORIES, categoryList, categoryDetail, srdDetail } from '../srd/api.js'
+import { srdSpellToModel, srdItemToModel, srdFeatureToModel, open5eFeatToModel } from '../srd/adapters.js'
+import { totalLevel, cryptoId } from '../model/character.js'
 import { toParagraphs } from '../utils/text.js'
+
+const ADD_LABELS = {
+  spell: '+ Add to my spells',
+  item: '+ Add to my inventory',
+  feature: '+ Add to my features',
+  subclass: '+ Set as my subclass',
+}
 
 export default function LookupSheet({ onClose }) {
   const [categoryKey, setCategoryKey] = useState('spells')
@@ -20,7 +28,7 @@ export default function LookupSheet({ onClose }) {
     setLoading(true)
     setError('')
     setSelected(null)
-    srdList(category.path)
+    categoryList(category)
       .then((results) => {
         if (!cancelled) setList(results)
       })
@@ -33,7 +41,7 @@ export default function LookupSheet({ onClose }) {
     return () => {
       cancelled = true
     }
-  }, [category.path])
+  }, [category.key])
 
   const filtered = query
     ? list.filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
@@ -43,7 +51,7 @@ export default function LookupSheet({ onClose }) {
     <div className="fsheet">
       <div className="fsheet__head">
         <h3>Compendium</h3>
-        <span className="faint tiny">SRD via dnd5eapi.co</span>
+        <span className="faint tiny">SRD via dnd5eapi.co · feats via Open5e</span>
         <span className="spacer" />
         <button className="btn btn--sm btn--ghost" onClick={onClose}>
           Close
@@ -120,23 +128,28 @@ function Detail({ entry, category, onBack }) {
   const character = useStore((s) => s.character)
   const addSpell = useStore((s) => s.addSpell)
   const addInventoryItem = useStore((s) => s.addInventoryItem)
+  const upsertFeature = useStore((s) => s.upsertFeature)
+  const updateCharacter = useStore((s) => s.updateCharacter)
   const setActiveTab = useStore((s) => s.setActiveTab)
 
+  const entryKey = entry.index || entry.url
   useEffect(() => {
     let cancelled = false
     setLoading(true)
     setError('')
     setAdded(false)
-    srdDetail(entry.url)
+    categoryDetail(category, entry)
       .then((d) => !cancelled && setData(d))
       .catch((e) => !cancelled && setError(e.message || 'Failed to load.'))
       .finally(() => !cancelled && setLoading(false))
     return () => {
       cancelled = true
     }
-  }, [entry.url])
+  }, [entryKey])
 
-  const add = () => {
+  const addTab = { spell: 'spells', item: 'inventory', feature: 'features', subclass: 'features' }[category.addable]
+
+  const add = async () => {
     if (category.addable === 'spell') {
       const ability =
         character?.spellcasting?.ability ||
@@ -145,8 +158,38 @@ function Detail({ entry, category, onBack }) {
       addSpell(srdSpellToModel(data, ability))
     } else if (category.addable === 'item') {
       addInventoryItem(srdItemToModel(data))
+    } else if (category.addable === 'feature') {
+      upsertFeature(category.source === 'open5e' ? open5eFeatToModel(data) : srdFeatureToModel(data))
+    } else if (category.addable === 'subclass') {
+      await addSubclass()
     }
     setAdded(true)
+  }
+
+  // Set the subclass name on the matching class and pull in its features
+  // (best-effort) up to the character's level.
+  const addSubclass = async () => {
+    const className = data.class?.name
+    updateCharacter((c) => ({
+      ...c,
+      classes: (c.classes || []).map((cl) =>
+        !className || cl.name === className ? { ...cl, subclass: data.name } : cl
+      ),
+    }))
+    try {
+      const levels = await srdDetail(`/api/subclasses/${data.index}/levels`)
+      if (Array.isArray(levels)) {
+        const maxLevel = totalLevel(character)
+        for (const lvl of levels) {
+          if ((lvl.level || 0) > maxLevel) continue
+          for (const f of lvl.features || []) {
+            if (f.name) upsertFeature({ id: cryptoId(), name: f.name, source: data.name, level: lvl.level, description: '' })
+          }
+        }
+      }
+    } catch {
+      /* keep the subclass name even if features can't be fetched */
+    }
   }
 
   return (
@@ -177,17 +220,14 @@ function Detail({ entry, category, onBack }) {
             <div style={{ marginTop: 16 }}>
               {added ? (
                 <div className="row" style={{ gap: 10 }}>
-                  <span className="badge badge--accent">Added ✓</span>
-                  <button
-                    className="btn btn--sm"
-                    onClick={() => setActiveTab(category.addable === 'spell' ? 'spells' : 'inventory')}
-                  >
-                    View in {category.addable === 'spell' ? 'Spells' : 'Items'}
+                  <span className="badge badge--accent">{category.addable === 'subclass' ? 'Set ✓' : 'Added ✓'}</span>
+                  <button className="btn btn--sm" onClick={() => setActiveTab(addTab)}>
+                    View in {addTab === 'inventory' ? 'Items' : addTab[0].toUpperCase() + addTab.slice(1)}
                   </button>
                 </div>
               ) : (
                 <button className="btn btn--primary btn--block" onClick={add}>
-                  {category.addable === 'spell' ? '+ Add to my spells' : '+ Add to my inventory'}
+                  {ADD_LABELS[category.addable]}
                 </button>
               )}
             </div>
@@ -217,6 +257,15 @@ function DetailMeta({ data, category }) {
   } else if (category.key === 'magic-items') {
     if (data.equipment_category?.name) bits.push(data.equipment_category.name)
     if (data.rarity?.name) bits.push(data.rarity.name)
+  } else if (category.key === 'features') {
+    if (data.class?.name) bits.push(data.class.name)
+    if (data.subclass?.name) bits.push(data.subclass.name)
+    if (data.level) bits.push(`Level ${data.level}`)
+  } else if (category.key === 'feats') {
+    if (data.prerequisite) bits.push(`Prereq: ${data.prerequisite}`)
+  } else if (category.key === 'subclasses') {
+    if (data.class?.name) bits.push(data.class.name)
+    if (data.subclass_flavor) bits.push(data.subclass_flavor)
   }
   if (!bits.length) return null
   return (

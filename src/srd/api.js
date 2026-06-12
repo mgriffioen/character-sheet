@@ -10,11 +10,17 @@ const LIST_TTL = 1000 * 60 * 60 * 24 * 7 // 7 days
 // a character ('spell' -> Spells, 'item' -> Inventory); others are reference.
 export const SRD_CATEGORIES = [
   { key: 'spells', label: 'Spells', path: 'spells', addable: 'spell' },
+  { key: 'feats', label: 'Feats', source: 'open5e', prefetched: true, addable: 'feature' },
+  { key: 'features', label: 'Class Features', path: 'features', addable: 'feature' },
+  { key: 'subclasses', label: 'Subclasses', path: 'subclasses', addable: 'subclass' },
   { key: 'equipment', label: 'Equipment', path: 'equipment', addable: 'item' },
   { key: 'magic-items', label: 'Magic Items', path: 'magic-items', addable: 'item' },
   { key: 'conditions', label: 'Conditions', path: 'conditions' },
   { key: 'rule-sections', label: 'Rules', path: 'rule-sections' },
 ]
+
+// Open5e (api.open5e.com) supplies OGL feats — the official SRD has only one.
+const OPEN5E = 'https://api.open5e.com'
 
 async function fetchJson(url) {
   let res
@@ -75,6 +81,34 @@ export async function srdDetail(url) {
   memDetail.set(url, data)
   lsSet(cacheKey, data)
   return data
+}
+
+// Fetch the OGL feats list from Open5e (full objects, so no detail fetch).
+export async function open5eFeats() {
+  const key = 'open5e:feats'
+  if (memList.has(key)) return memList.get(key)
+  const cached = lsGet(`srd:list:${key}`)
+  if (cached && Date.now() - cached.ts < LIST_TTL && Array.isArray(cached.results)) {
+    memList.set(key, cached.results)
+    return cached.results
+  }
+  const data = await fetchJson(`${OPEN5E}/v1/feats/?limit=500`)
+  const results = (data.results || []).map((f) => ({ ...f, index: f.slug || f.key || f.name, name: f.name }))
+  memList.set(key, results)
+  lsSet(`srd:list:${key}`, { ts: Date.now(), results })
+  return results
+}
+
+// Source-aware list/detail used by the compendium so categories from different
+// providers (dnd5eapi, Open5e) share one UI.
+export async function categoryList(category) {
+  if (category.source === 'open5e') return open5eFeats()
+  return srdList(category.path)
+}
+
+export async function categoryDetail(category, entry) {
+  if (category.prefetched) return entry // list items already carry full data
+  return srdDetail(entry.url)
 }
 
 // Test/maintenance helper.

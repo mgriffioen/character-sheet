@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { srdSpellToModel, srdItemToModel } from './adapters.js'
+import { srdSpellToModel, srdItemToModel, srdFeatureToModel, open5eFeatToModel } from './adapters.js'
 
 const fireball = {
   index: 'fireball',
@@ -49,6 +49,22 @@ test('srdItemToModel maps a weapon', () => {
   assert.equal(m.rarity, null)
   assert.equal(m.magic, false)
   assert.equal(m.equipped, false)
+})
+
+test('srdFeatureToModel maps a class feature', () => {
+  const m = srdFeatureToModel({ name: 'Rage', class: { name: 'Barbarian' }, level: 1, desc: ['In battle you fight with primal ferocity.'] })
+  assert.equal(m.name, 'Rage')
+  assert.equal(m.source, 'Barbarian')
+  assert.equal(m.level, 1)
+  assert.ok(m.description.includes('primal ferocity'))
+})
+
+test('open5eFeatToModel maps a feat with prerequisite', () => {
+  const m = open5eFeatToModel({ name: 'Sharpshooter', prerequisite: 'Dexterity 13', desc: 'You have mastered ranged weapons.' })
+  assert.equal(m.name, 'Sharpshooter')
+  assert.equal(m.source, 'Feat')
+  assert.ok(m.description.includes('Prerequisite: Dexterity 13'))
+  assert.ok(m.description.includes('mastered ranged'))
 })
 
 test('srdItemToModel maps a magic item with rarity', () => {

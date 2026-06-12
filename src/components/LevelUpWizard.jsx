@@ -198,7 +198,7 @@ export default function LevelUpWizard({ onClose }) {
             )}
             <label className="lvl-option">
               <input type="radio" checked={asiMode === 'feat'} onChange={() => setAsiMode('feat')} />
-              <span>Take a feat instead (add it from Features later)</span>
+              <span>Take a feat instead (add it from the 🔍 Feats compendium)</span>
             </label>
           </div>
         )}

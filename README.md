@@ -20,10 +20,14 @@ local storage) — nothing is uploaded anywhere.
   (`d4`–`d100` and expressions like `2d6+3`).
 - **Editable attacks** — add, edit, or delete any attack (name, to-hit, damage
   dice + flat damage, type, range); an Unarmed Strike is included automatically.
-- **Compendium (SRD lookup)** — tap 🔍 to search the free 5e library (spells,
-  equipment, magic items, conditions, rules) and **add spells or items straight
-  to your character**. Results are cached, so it's fast and works offline after
-  first use. Remove spells/items from your sheet anytime.
+- **Compendium (SRD lookup)** — tap 🔍 to search the free 5e library: **spells,
+  feats, class features, subclasses, equipment, magic items, conditions, and
+  rules** — and **add them straight to your character** (spells, items, features;
+  picking a subclass also pulls in its features). Feats come from Open5e since
+  the official SRD has only one; everything else is dnd5eapi.co. Cached for
+  speed/offline use.
+- **Editable features** — add, edit, or remove any class feature, feat, or trait
+  by hand on the Features tab (great for homebrew or book content you own).
 - **Guided builder** — create a level-1 character from scratch, step by step
   (race → class & skills → ability scores → background → review), all from the
   SRD. No D&D Beyond needed.

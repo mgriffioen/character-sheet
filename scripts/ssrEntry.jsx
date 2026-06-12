@@ -209,6 +209,17 @@ export async function run() {
   assert(!useStore.getState().character.spellcasting.slots['1'], 'setting max 0 did not remove the level')
   console.log('  ✓ slots       editable maximums work')
 
+  // Manual features: the add button is present, and add/remove works.
+  await act(async () => useStore.getState().setActiveTab('features'))
+  assert(container.textContent.includes('Add feature'), 'add-feature button missing')
+  await act(async () =>
+    useStore.getState().upsertFeature({ id: 'feat-test', name: 'Test Feat', source: 'Feat', level: null, description: 'desc' })
+  )
+  assert(container.textContent.includes('Test Feat'), 'manual feature did not render')
+  await act(async () => useStore.getState().removeFeature('feat-test'))
+  assert(!container.textContent.includes('Test Feat'), 'feature was not removed')
+  console.log('  ✓ features    add/remove works')
+
   // Guided level-up: open from the menu, step through, and confirm the class
   // advances. (fetch is the compendium stub from earlier -> SRD fallbacks.)
   const beforeLevel = useStore.getState().character.classes[0].level

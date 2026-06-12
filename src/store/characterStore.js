@@ -170,6 +170,24 @@ export const useStore = create(
             : state
         ),
 
+      // ---- features (class features, feats, traits) ----
+      upsertFeature: (feature) =>
+        set((state) => {
+          if (!state.character) return state
+          const features = [...(state.character.features || [])]
+          const idx = features.findIndex((f) => f.id === feature.id)
+          if (idx >= 0) features[idx] = feature
+          else features.push(feature)
+          return { character: { ...state.character, features } }
+        }),
+
+      removeFeature: (id) =>
+        set((state) =>
+          state.character
+            ? { character: { ...state.character, features: (state.character.features || []).filter((f) => f.id !== id) } }
+            : state
+        ),
+
       // ---- dice ----
       setRollMode: (rollMode) => set({ rollMode }),
 
