@@ -209,6 +209,27 @@ export async function run() {
   assert(!useStore.getState().character.spellcasting.slots['1'], 'setting max 0 did not remove the level')
   console.log('  ✓ slots       editable maximums work')
 
+  // Guided level-up: open from the menu, step through, and confirm the class
+  // advances. (fetch is the compendium stub from earlier -> SRD fallbacks.)
+  const beforeLevel = useStore.getState().character.classes[0].level
+  await act(async () => container.querySelector('[aria-label="Menu"]').click())
+  await act(async () =>
+    [...container.querySelectorAll('button')].find((b) => b.textContent.includes('Level Up')).click()
+  )
+  await tick()
+  assert(container.textContent.includes('Hit Points'), 'level-up HP step missing')
+  await act(async () =>
+    [...container.querySelectorAll('.build-nav button')].find((b) => b.textContent.trim() === 'Next').click()
+  )
+  await act(async () =>
+    [...container.querySelectorAll('.build-nav button')].find((b) => /Level up to/.test(b.textContent)).click()
+  )
+  assert(
+    useStore.getState().character.classes[0].level === beforeLevel + 1,
+    'level-up did not advance the class level'
+  )
+  console.log('  ✓ level-up    advances the class')
+
   await act(async () => root.unmount())
   dom.window.close()
   console.log('Render smoke test passed.')

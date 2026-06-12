@@ -27,6 +27,9 @@ local storage) — nothing is uploaded anywhere.
 - **Guided builder** — create a level-1 character from scratch, step by step
   (race → class & skills → ability scores → background → review), all from the
   SRD. No D&D Beyond needed.
+- **Guided level-up** — ☰ → Level Up walks you through HP (roll or average),
+  ability score improvements, subclass selection, the new features you gain, and
+  updated spell slots.
 - **Advantage / disadvantage** toggle that applies to every d20 roll.
 - **Roll log** with the full breakdown of each roll (which dice, what was kept).
 - **HP management** — damage/heal, temporary HP, death saves.
@@ -53,9 +56,8 @@ hold the screen. Respects `prefers-reduced-motion`.
 
 ## Roadmap (planned)
 
-- A guided **level-up** flow that walks you through each step when you gain a
-  level (HP, features, ability score improvements, new spells/slots).
 - Multiple characters / party roster.
+- A feats library and richer per-level feature descriptions.
 - Short rest, hit-dice spending, concentration tracking, conditions.
 - Auto-parsing of D&D Beyond weapon *customizations* (custom names + to-hit/
   damage bonuses) so customized weapons import exactly.

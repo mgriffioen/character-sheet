@@ -1510,3 +1510,16 @@ details.collapser[open] > summary {
 .lookup__row.is-selected {
   color: var(--gold);
 }
+
+.lvl-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+}
+.lvl-option input {
+  margin-top: 3px;
+}
+.lvl-option > span {
+  flex: 1;
+}

@@ -10,7 +10,7 @@ const THEMES = [
   { key: 'parchment', label: 'Parchment', bg: '#f2e9d4', accent: '#9a3b2a' },
 ]
 
-export default function CharacterMenu({ onClose, onEditDetails }) {
+export default function CharacterMenu({ onClose, onEditDetails, onLevelUp }) {
   const character = useStore((s) => s.character)
   const updateCharacter = useStore((s) => s.updateCharacter)
   const clearCharacter = useStore((s) => s.clearCharacter)
@@ -64,6 +64,12 @@ export default function CharacterMenu({ onClose, onEditDetails }) {
             <label>Name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveName} />
           </div>
+
+          {onLevelUp && (
+            <button className="btn btn--block" onClick={onLevelUp}>
+              ⬆ Level Up
+            </button>
+          )}
 
           {onEditDetails && (
             <button className="btn btn--block" onClick={onEditDetails}>

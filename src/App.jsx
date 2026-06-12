@@ -8,6 +8,7 @@ import DiceTray from './components/DiceTray.jsx'
 import CharacterMenu from './components/CharacterMenu.jsx'
 import LookupSheet from './components/LookupSheet.jsx'
 import CharacterEditor from './components/CharacterEditor.jsx'
+import LevelUpWizard from './components/LevelUpWizard.jsx'
 
 import SkillsTab from './tabs/SkillsTab.jsx'
 import CombatTab from './tabs/CombatTab.jsx'
@@ -30,6 +31,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [lookupOpen, setLookupOpen] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
+  const [levelUpOpen, setLevelUpOpen] = useState(false)
 
   const theme = useStore((s) => s.theme)
   const accent = useStore((s) => s.accent)
@@ -77,10 +79,15 @@ export default function App() {
             setMenuOpen(false)
             setEditorOpen(true)
           }}
+          onLevelUp={() => {
+            setMenuOpen(false)
+            setLevelUpOpen(true)
+          }}
         />
       )}
       {lookupOpen && <LookupSheet onClose={() => setLookupOpen(false)} />}
       {editorOpen && <CharacterEditor onClose={() => setEditorOpen(false)} />}
+      {levelUpOpen && <LevelUpWizard onClose={() => setLevelUpOpen(false)} />}
     </div>
   )
 }
