@@ -24,6 +24,9 @@ local storage) — nothing is uploaded anywhere.
   equipment, magic items, conditions, rules) and **add spells or items straight
   to your character**. Results are cached, so it's fast and works offline after
   first use. Remove spells/items from your sheet anytime.
+- **Guided builder** — create a level-1 character from scratch, step by step
+  (race → class & skills → ability scores → background → review), all from the
+  SRD. No D&D Beyond needed.
 - **Advantage / disadvantage** toggle that applies to every d20 roll.
 - **Roll log** with the full breakdown of each roll (which dice, what was kept).
 - **HP management** — damage/heal, temporary HP, death saves.
@@ -50,8 +53,8 @@ hold the screen. Respects `prefers-reduced-motion`.
 
 ## Roadmap (planned)
 
-- A guided character builder (pick race/class/background, level up) on top of
-  the compendium, for fully D&D-Beyond-free character creation.
+- A guided **level-up** flow that walks you through each step when you gain a
+  level (HP, features, ability score improvements, new spells/slots).
 - Multiple characters / party roster.
 - Short rest, hit-dice spending, concentration tracking, conditions.
 - Auto-parsing of D&D Beyond weapon *customizations* (custom names + to-hit/

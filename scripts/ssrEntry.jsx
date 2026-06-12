@@ -40,6 +40,18 @@ export async function run() {
   assert(container.textContent.includes('Character Sheet'), 'welcome title missing')
   console.log('  ✓ welcome     rendered')
 
+  // Guided builder opens from the welcome screen and cancels back.
+  await act(async () =>
+    [...container.querySelectorAll('button')].find((b) => b.textContent.includes('Build a character')).click()
+  )
+  assert(container.textContent.includes('Build a Character'), 'builder did not open')
+  assert(container.querySelector('.build-progress'), 'builder progress bar missing')
+  await act(async () =>
+    [...container.querySelectorAll('.fsheet button')].find((b) => b.textContent.trim() === 'Cancel').click()
+  )
+  assert(container.textContent.includes('Build a character (guided)'), 'did not return to welcome')
+  console.log('  ✓ builder     opens from welcome')
+
   // Load the sample character and walk every tab.
   await act(async () => {
     useStore.getState().setCharacter(parseDdbCharacter(sampleDdbCharacter))

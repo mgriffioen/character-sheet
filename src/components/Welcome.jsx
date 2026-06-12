@@ -2,11 +2,13 @@ import { useState, useRef } from 'react'
 import { useStore } from '../store/characterStore.js'
 import { parseDdbCharacter } from '../ddb/parseDdb.js'
 import { sampleDdbCharacter } from '../ddb/sampleDdbCharacter.js'
+import CharacterBuilder from './CharacterBuilder.jsx'
 
 export default function Welcome() {
   const setCharacter = useStore((s) => s.setCharacter)
   const newBlankCharacter = useStore((s) => s.newBlankCharacter)
   const [showImport, setShowImport] = useState(false)
+  const [showBuilder, setShowBuilder] = useState(false)
   const [json, setJson] = useState('')
   const [error, setError] = useState('')
   const fileRef = useRef(null)
@@ -38,15 +40,22 @@ export default function Welcome() {
 
   const loadSample = () => setCharacter(parseDdbCharacter(sampleDdbCharacter))
 
+  if (showBuilder) {
+    return <CharacterBuilder onClose={() => setShowBuilder(false)} />
+  }
+
   if (!showImport) {
     return (
       <div className="welcome">
         <h1>⚔️ Character Sheet</h1>
         <p>
           An interactive D&amp;D 5e character sheet for the table. Roll any stat with a tap,
-          track HP and spell slots, and bring your hero in straight from D&amp;D Beyond.
+          track HP and spell slots, and build or import your hero.
         </p>
-        <button className="btn btn--primary" onClick={() => setShowImport(true)}>
+        <button className="btn btn--primary" onClick={() => setShowBuilder(true)}>
+          🧭 Build a character (guided)
+        </button>
+        <button className="btn" onClick={() => setShowImport(true)}>
           Import from D&amp;D Beyond
         </button>
         <button className="btn" onClick={loadSample}>
