@@ -10,6 +10,7 @@ import {
   levelUpCharacter,
 } from '../srd/levelUp.js'
 import { rollDie } from '../dice/dice.js'
+import { cryptoId } from '../model/character.js'
 import { ABILITIES, ABILITY_NAMES, abilityModifier, signed } from '../rules/dnd.js'
 
 export default function LevelUpWizard({ onClose }) {
@@ -37,6 +38,7 @@ export default function LevelUpWizard({ onClose }) {
   const [asiA, setAsiA] = useState('str')
   const [asiB, setAsiB] = useState('dex')
   const [subclass, setSubclass] = useState('')
+  const [subclassFeatures, setSubclassFeatures] = useState([])
 
   // Fetch the class's per-level data + subclasses (best-effort; fallbacks exist).
   useEffect(() => {
@@ -92,11 +94,37 @@ export default function LevelUpWizard({ onClose }) {
         hpGain,
         abilityIncreases,
         subclass: subclass || undefined,
-        features: newFeatures,
+        features: [...newFeatures, ...subclassFeatures],
         slots: newSlots || undefined,
       })
     )
     onClose()
+  }
+
+  // Pick a subclass and fetch its features up to the new level (best-effort).
+  const pickSubclass = async (sc) => {
+    if (subclass === sc.name) {
+      setSubclass('')
+      setSubclassFeatures([])
+      return
+    }
+    setSubclass(sc.name)
+    setSubclassFeatures([])
+    try {
+      const levels = await srdDetail(`/api/subclasses/${sc.index}/levels`)
+      if (Array.isArray(levels)) {
+        const feats = []
+        for (const lvl of levels) {
+          if ((lvl.level || 0) > newLevel) continue
+          for (const f of lvl.features || []) {
+            if (f.name) feats.push({ id: cryptoId(), name: f.name, source: sc.name, level: lvl.level, description: '' })
+          }
+        }
+        setSubclassFeatures(feats)
+      }
+    } catch {
+      /* keep the subclass name even if features can't be fetched */
+    }
   }
 
   const next = () => (stepIndex < steps.length - 1 ? setStepIndex(stepIndex + 1) : finish())
@@ -215,7 +243,7 @@ export default function LevelUpWizard({ onClose }) {
                     <button
                       key={sc.index || sc.name}
                       className={`chip ${subclass === sc.name ? 'is-active' : ''}`}
-                      onClick={() => setSubclass(subclass === sc.name ? '' : sc.name)}
+                      onClick={() => pickSubclass(sc)}
                     >
                       {sc.name}
                     </button>
@@ -242,7 +270,13 @@ export default function LevelUpWizard({ onClose }) {
                     .join(', ')}
                 </li>
               )}
-              {subclass && <li><b>Subclass:</b> {subclass}</li>}
+              {subclass && (
+                <li>
+                  <b>Subclass:</b> {subclass}
+                  {subclassFeatures.length > 0 &&
+                    ` — ${subclassFeatures.map((f) => f.name).join(', ')}`}
+                </li>
+              )}
               {newFeatures.length > 0 && (
                 <li><b>Features:</b> {newFeatures.map((f) => f.name).join(', ')}</li>
               )}
