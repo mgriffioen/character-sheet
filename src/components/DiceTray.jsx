@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/characterStore.js'
-import { describeRoll } from '../utils/rollFormat.js'
+import { describeRoll, rollVisual } from '../utils/rollFormat.js'
 import RollLogSheet from './RollLogSheet.jsx'
+import Die from './Die.jsx'
 
 const QUICK_DICE = [4, 6, 8, 10, 12, 20, 100]
 
-// Animate the headline total when a new roll lands: briefly tumble through
-// random faces, then settle on the result with a pop. Skips the roll that's
-// already present on load, and respects prefers-reduced-motion.
-function useRollAnimation(roll) {
-  const [display, setDisplay] = useState(roll ? roll.total : null)
+// Animate a new roll: briefly tumble the die's face through random values, then
+// settle on `target`. Skips the roll already present on load, and respects
+// prefers-reduced-motion.
+function useRollAnimation(roll, target, cap) {
+  const [display, setDisplay] = useState(target)
   const [phase, setPhase] = useState('idle') // 'idle' | 'rolling' | 'settle'
   const seenId = useRef(roll?.id)
 
@@ -27,15 +28,15 @@ function useRollAnimation(roll) {
     }
 
     setPhase('rolling')
-    const cap = roll.kind === 'd20' ? 20 : Math.max(6, Math.abs(roll.total) || 6)
+    const faces = Math.max(2, cap || 6)
     let frames = 0
     let settleTimer
     const id = setInterval(() => {
       frames += 1
-      setDisplay(1 + Math.floor(Math.random() * cap))
+      setDisplay(1 + Math.floor(Math.random() * faces))
       if (frames >= 8) {
         clearInterval(id)
-        setDisplay(roll.total)
+        setDisplay(target)
         setPhase('settle')
         settleTimer = setTimeout(() => setPhase('idle'), 350)
       }
@@ -44,10 +45,10 @@ function useRollAnimation(roll) {
       clearInterval(id)
       clearTimeout(settleTimer)
     }
-  }, [roll?.id, roll?.total, roll?.kind])
+  }, [roll?.id, target, cap])
 
-  // When not actively tumbling, always show the true total.
-  return { display: phase === 'rolling' ? display : roll ? roll.total : null, phase }
+  // When not actively tumbling, always show the true target value.
+  return { display: phase === 'rolling' ? display : target, phase }
 }
 
 export default function DiceTray() {
@@ -58,11 +59,16 @@ export default function DiceTray() {
   const [logOpen, setLogOpen] = useState(false)
   const [customOpen, setCustomOpen] = useState(false)
 
-  const { display, phase } = useRollAnimation(lastRoll)
-  const natClass =
-    phase !== 'rolling' ? (lastRoll?.isNat20 ? 'nat20' : lastRoll?.isNat1 ? 'nat1' : '') : ''
+  const visual = rollVisual(lastRoll)
+  const target = visual.dieValue ?? visual.total ?? 0
+  const cap = visual.sides || Math.max(6, Math.abs(visual.total || 6))
+  const { display, phase } = useRollAnimation(lastRoll, target, cap)
+
+  const tone = lastRoll?.isNat20 ? 'crit' : lastRoll?.isNat1 ? 'fail' : 'normal'
+  const natClass = tone === 'crit' ? 'nat20' : tone === 'fail' ? 'nat1' : ''
   const motionClass = phase === 'rolling' ? 'is-rolling' : phase === 'settle' ? 'settle' : ''
-  const lastClass = `${natClass} ${motionClass}`.trim()
+  // Show a separate total only when it differs from the natural die value.
+  const showTotal = visual.dieValue != null && visual.total !== visual.dieValue
 
   return (
     <>
@@ -98,7 +104,23 @@ export default function DiceTray() {
           <button className="last-roll" onClick={() => setLogOpen(true)}>
             {lastRoll ? (
               <>
-                <span className={`last-roll__total ${lastClass}`}>{display}</span>
+                {visual.sides != null ? (
+                  <Die
+                    sides={visual.sides}
+                    value={display}
+                    tone={tone}
+                    size={48}
+                    rolling={phase === 'rolling'}
+                    settle={phase === 'settle'}
+                  />
+                ) : (
+                  <span className={`last-roll__total ${natClass} ${motionClass}`.trim()}>{display}</span>
+                )}
+                {showTotal && (
+                  <span className={`last-roll__sum ${natClass}`.trim()}>
+                    {phase === 'rolling' ? '' : visual.total}
+                  </span>
+                )}
                 <span className="last-roll__meta">
                   <span className="last-roll__label">
                     {phase === 'rolling' ? 'Rolling…' : lastRoll.label}

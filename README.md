@@ -38,8 +38,9 @@ local storage) — nothing is uploaded anywhere.
   import doesn't match (homebrew, unusual items), and your override sticks.
 - **Export / backup** your character as JSON to move it between devices.
 - **Make it yours** — five color themes (Ember, Arcane, Forest, Slate, and a
-  light Parchment) plus a custom accent color, and an animated dice roll. Pick
-  them under ☰ → Appearance.
+  light Parchment) plus a custom accent color. Rolls land on an animated die
+  drawn in the correct shape (d4 triangle through d20 icosahedron). Pick themes
+  under ☰ → Appearance.
 
 Built **tablet-first (portrait)** with large touch targets and a persistent
 dice tray — and it now **adapts to landscape and desktop** widths with a

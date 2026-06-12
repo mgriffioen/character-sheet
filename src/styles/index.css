@@ -635,6 +635,7 @@ h1, h2, h3, h4 {
 }
 .last-roll__meta {
   min-width: 0;
+  flex: 1;
 }
 .last-roll__label {
   font-weight: 600;
@@ -677,6 +678,116 @@ h1, h2, h3, h4 {
 .die-btn:active {
   background: var(--surface-3);
   color: var(--text);
+}
+
+/* ---------- Shaped dice ---------- */
+
+.die {
+  display: block;
+  flex-shrink: 0;
+  overflow: visible;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.die__shape {
+  fill: var(--surface-3);
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+.die__inner {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  opacity: 0.45;
+}
+.die__num {
+  fill: var(--text);
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+.die--crit .die__shape {
+  stroke: var(--good);
+  filter: drop-shadow(0 0 5px var(--good));
+}
+.die--crit .die__inner {
+  stroke: var(--good);
+}
+.die--crit .die__num {
+  fill: var(--good);
+}
+.die--fail .die__shape {
+  stroke: var(--bad);
+}
+.die--fail .die__inner {
+  stroke: var(--bad);
+}
+.die--fail .die__num {
+  fill: var(--bad);
+}
+.die.is-rolling {
+  animation: die-spin 0.42s ease-in-out;
+}
+.die.settle {
+  animation: die-pop 0.35s ease;
+}
+@keyframes die-spin {
+  0% {
+    transform: rotate(-30deg) scale(0.85);
+  }
+  100% {
+    transform: rotate(0) scale(1);
+  }
+}
+@keyframes die-pop {
+  0% {
+    transform: scale(1.25);
+  }
+  55% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .die.is-rolling,
+  .die.settle {
+    animation: none;
+  }
+}
+
+.last-roll__sum {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  min-width: 26px;
+  text-align: center;
+  color: var(--text);
+  line-height: 1;
+}
+.last-roll__sum.nat20 {
+  color: var(--good);
+}
+.last-roll__sum.nat1 {
+  color: var(--bad);
+}
+
+.logitem__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.logitem__sum {
+  font-family: var(--font-serif);
+  font-size: 20px;
+}
+.logitem__sum.nat20 {
+  color: var(--good);
+}
+.logitem__sum.nat1 {
+  color: var(--bad);
 }
 
 /* ---------- Roll log sheet ---------- */

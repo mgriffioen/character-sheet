@@ -72,7 +72,8 @@ export async function run() {
   assert(useStore.getState().rollLog.length > 0, 'roll log did not record a roll')
   const last = useStore.getState().rollLog[0]
   assert(last.total >= 3 && last.total <= 22, 'd20 roll out of expected range')
-  console.log('  ✓ rolling     works (logged a d20)')
+  assert(container.querySelector('svg.die'), 'shaped die did not render in the tray')
+  console.log('  ✓ rolling     works (logged a d20, shaped die shown)')
 
   await act(async () => {
     useStore.getState().adjustHp(-10)
