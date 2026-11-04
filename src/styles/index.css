@@ -352,8 +352,9 @@ h1, h2, h3, h4 {
 
 .abilities {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  margin-bottom: 12px;
 }
 
 .ability {
@@ -395,7 +396,9 @@ h1, h2, h3, h4 {
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 1px 10px;
-  min-width: 38px;
+  width: 56px;
+  max-width: 100%;
+  text-align: center;
 }
 
 /* ---------- Roll rows (saves / skills) ---------- */
