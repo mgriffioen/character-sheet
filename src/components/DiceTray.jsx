@@ -6,6 +6,10 @@ import RollDice from './RollDice.jsx'
 
 const QUICK_DICE = [4, 6, 8, 10, 12, 20, 100]
 
+// Keep in sync with the die-spin / die-pop animation durations in index.css.
+const ROLL_MS = 1200
+const SETTLE_MS = 450
+
 // Animate a new roll: briefly tumble the die's face through random values, then
 // settle on `target`. Skips the roll already present on load, and respects
 // prefers-reduced-motion.
@@ -29,22 +33,26 @@ function useRollAnimation(roll, target, cap) {
 
     setPhase('rolling')
     const faces = Math.max(2, cap || 6)
-    let frames = 0
-    let settleTimer
-    const id = setInterval(() => {
-      frames += 1
+    // Tumble for ~1.2s, starting fast and slowing down as the die settles.
+    let delay = 40
+    let elapsed = 0
+    let timer
+    const tick = () => {
       setDisplay(1 + Math.floor(Math.random() * faces))
-      if (frames >= 8) {
-        clearInterval(id)
-        setDisplay(target)
-        setPhase('settle')
-        settleTimer = setTimeout(() => setPhase('idle'), 350)
+      elapsed += delay
+      delay *= 1.15
+      if (elapsed + delay >= ROLL_MS) {
+        timer = setTimeout(() => {
+          setDisplay(target)
+          setPhase('settle')
+          timer = setTimeout(() => setPhase('idle'), SETTLE_MS)
+        }, ROLL_MS - elapsed)
+      } else {
+        timer = setTimeout(tick, delay)
       }
-    }, 45)
-    return () => {
-      clearInterval(id)
-      clearTimeout(settleTimer)
     }
+    timer = setTimeout(tick, delay)
+    return () => clearTimeout(timer)
   }, [roll?.id, target, cap])
 
   // When not actively tumbling, always show the true target value.
