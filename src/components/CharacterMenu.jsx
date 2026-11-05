@@ -82,7 +82,7 @@ export default function CharacterMenu({ onClose, onEditDetails, onLevelUp }) {
           <button className="btn btn--primary btn--block" onClick={longRest}>
             🌙 Long Rest
           </button>
-          <p className="faint tiny" style={{ marginTop: -4 }}>
+          <p className="faint tiny" style={{ margin: "6px 0 0" }}>
             Restores HP to full, resets spell slots and death saves, and regains half your hit dice.
           </p>
 
