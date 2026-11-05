@@ -8,6 +8,12 @@ const THEMES = [
   { key: 'forest', label: 'Forest', bg: '#14201a', accent: '#4f9d56' },
   { key: 'slate', label: 'Slate', bg: '#1a1e25', accent: '#4f93c7' },
   { key: 'parchment', label: 'Parchment', bg: '#f2e9d4', accent: '#9a3b2a' },
+  {
+    key: 'rainbow',
+    label: 'Rainbow',
+    bg: 'linear-gradient(135deg, #ef4444, #f59e0b, #facc15, #22c55e, #3b82f6, #8b5cf6)',
+    accent: '#e0457b',
+  },
 ]
 
 export default function CharacterMenu({ onClose, onEditDetails, onLevelUp }) {

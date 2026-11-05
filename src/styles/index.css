@@ -113,6 +113,48 @@
   --shadow: 0 4px 14px rgba(80, 60, 30, 0.25);
 }
 
+[data-theme='rainbow'] {
+  --bg: #120f1a;
+  --bg-2: #1a1624;
+  --surface: #211c2e;
+  --surface-2: #2a2439;
+  --surface-3: #352d47;
+  --border: #463c5c;
+  --border-soft: #362f4a;
+  --text: #f4f0fb;
+  --text-dim: #c3b9d8;
+  --text-faint: #8f85a8;
+  --accent: #e0457b;
+  --accent-soft: #9c2f57;
+  --gold: #f2c14e;
+  --good: #4fc28a;
+  --bad: #ef5a5a;
+  --info: #4aa8e8;
+  --rainbow: linear-gradient(90deg, #ef4444, #f59e0b, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+}
+
+/* Rainbow flourishes: gradient strips on the header, tabs and dice tray. */
+[data-theme='rainbow'] .header {
+  border-bottom: 3px solid transparent;
+  border-image: var(--rainbow) 1;
+}
+[data-theme='rainbow'] .tray {
+  border-top: 3px solid transparent;
+  border-image: var(--rainbow) 1;
+}
+[data-theme='rainbow'] .tab.is-active {
+  border-bottom-color: transparent;
+  border-image: var(--rainbow) 0 0 1 0 / 0 0 3px 0;
+}
+[data-theme='rainbow'] .header__name {
+  width: fit-content;
+  max-width: 100%;
+  background: var(--rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
