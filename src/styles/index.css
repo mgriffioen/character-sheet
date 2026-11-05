@@ -352,8 +352,9 @@ h1, h2, h3, h4 {
 
 .abilities {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  margin-bottom: 12px;
 }
 
 .ability {
@@ -395,7 +396,9 @@ h1, h2, h3, h4 {
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 1px 10px;
-  min-width: 38px;
+  width: 56px;
+  max-width: 100%;
+  text-align: center;
 }
 
 /* ---------- Roll rows (saves / skills) ---------- */
@@ -593,13 +596,13 @@ h1, h2, h3, h4 {
   filter: blur(0.5px);
 }
 .last-roll__total.settle {
-  animation: roll-pop 0.35s ease;
+  animation: roll-pop 0.45s ease;
 }
 .last-roll__total.settle.nat20 {
   text-shadow: 0 0 14px var(--good);
 }
 .last-roll__total.settle.nat1 {
-  animation: roll-shake 0.35s ease;
+  animation: roll-shake 0.45s ease;
 }
 @keyframes roll-pop {
   0% {
@@ -638,12 +641,14 @@ h1, h2, h3, h4 {
   flex: 1;
 }
 .last-roll__label {
+  display: block;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .last-roll__detail {
+  display: block;
   color: var(--text-dim);
   font-size: 12px;
   white-space: nowrap;
@@ -761,14 +766,14 @@ h1, h2, h3, h4 {
   border: 1px solid var(--bg);
 }
 .die.is-rolling {
-  animation: die-spin 0.42s ease-in-out;
+  animation: die-spin 1.2s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 .die.settle {
-  animation: die-pop 0.35s ease;
+  animation: die-pop 0.45s ease;
 }
 @keyframes die-spin {
   0% {
-    transform: rotate(-30deg) scale(0.85);
+    transform: rotate(-360deg) scale(0.85);
   }
   100% {
     transform: rotate(0) scale(1);
